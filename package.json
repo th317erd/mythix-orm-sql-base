@@ -29,6 +29,9 @@
     "url": "https://github.com/th317erd/mythix-orm-sql-base/issues"
   },
   "homepage": "https://github.com/th317erd/mythix-orm-sql-base#readme",
+  "peerDependencies": {
+    "mythix-orm": "^1.0.0"
+  },
   "dependencies": {
     "nife": "^1.10.0",
     "sqlstring": "^2.3.3",

@@ -1,7 +1,7 @@
 'use strict';
 
 const Nife                  = require('nife');
-const moment                = require('moment');
+const moment                = require('mythix-orm/node_modules/moment');
 const Database              = require('better-sqlite3');
 const { Literals }          = require('mythix-orm');
 const SQLConnectionBase     = require('../../../lib/sql-connection-base');
