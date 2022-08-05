@@ -34,7 +34,7 @@ class User extends Model {
       type:       Types.Model('UserThing:userID'),
     },
     'userThingRole': {
-      type:       Types.Model('Role', 'userThing.role'),
+      type:       Types.Model('Role', 'User:userThing.role'),
     },
     'primaryRole': {
       type:       Types.Model('Role', 'primaryRoleID'),
