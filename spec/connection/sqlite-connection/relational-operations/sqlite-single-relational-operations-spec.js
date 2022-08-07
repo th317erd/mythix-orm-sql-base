@@ -39,6 +39,11 @@ describe('SQLiteConnection', () => {
     });
 
     describe('create single-relational models', () => {
+      fit('can properly generate a query', async () => {
+        let user = new User({ firstName: 'Mary', lastName: 'Anne', primaryRoleID: '5016a9dc-0271-41a0-937a-a0c95acd117b' });
+        expect((await user.queryForUserThingRole()).toSQL()).toEqual('SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name" FROM "roles" INNER JOIN "role_things" ON "role_things"."roleID" = "roles"."id" INNER JOIN "user_things" ON "user_things"."roleThingID" = "role_things"."id" WHERE "user_things"."userID" = \'be146952-c48f-43ae-b160-f53a97a13fcf\' ORDER BY "roles"."rowid" ASC');
+      });
+
       it('can create a single model through a relational field', async () => {
         let userModels = [
           new User({ firstName: 'Mary', lastName: 'Anne' }),
