@@ -139,8 +139,11 @@ describe('SQLiteConnection', () => {
 
         await connection.insert(models.ExtendedUser, userModels);
 
-        let user = await models.ExtendedUser.where.first();
-        expect(JSON.stringify(user)).toEqual('{"id":1,"createdAt":"07.30.2022 22:39:01","email":"test@example.com","firstName":"Mary","lastName":"Anne","playerType":"wizard","primaryRoleID":null,"updatedAt":"07.30.2022 22:39:01"}');
+        let user      = await models.ExtendedUser.where.first();
+        let result    = JSON.stringify(user);
+        let expected  = '{"id":1,"createdAt":"07.30.2022 22:39:01","email":"test@example.com","firstName":"Mary","lastName":"Anne","playerType":"wizard","primaryRoleID":null,"updatedAt":"07.30.2022 22:39:01"}';
+
+        expect(result).toEqual(expected);
       });
     });
 

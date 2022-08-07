@@ -8,7 +8,9 @@ async function createConnection() {
   };
 
   let connection = new SQLiteConnection({
-    models: require('../../support/models'),
+    emulateBigIntAutoIncrement: true,
+    bindModels:                 false,
+    models:                     require('../../support/models'),
   });
 
   await connection.start();

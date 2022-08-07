@@ -1,6 +1,5 @@
 'use strict';
 
-const { Literals }          = require('mythix-orm');
 const SQLQueryGeneratorBase = require('../../../lib/sql-query-generator-base');
 
 class SQLiteQueryGenerator extends SQLQueryGeneratorBase {
@@ -18,14 +17,14 @@ class SQLiteQueryGenerator extends SQLQueryGeneratorBase {
 
   generateForeignKeyConstraint(field, type) {
     let options     = type.getOptions();
-    let targetModel = type.getTargetModel();
-    let targetField = type.getTargetField();
+    let targetModel = type.getTargetModel(this.connection);
+    let targetField = type.getTargetField(this.connection);
 
-    let sqlParts  = [
+    let sqlParts = [
       'FOREIGN KEY(',
       this.escapeID(field.columnName),
       ') REFERENCES ',
-      this.escapeID(targetModel.getTableName()),
+      this.escapeID(targetModel.getTableName(this.connection)),
       '(',
       this.escapeID(targetField.columnName),
       ')',
@@ -47,68 +46,6 @@ class SQLiteQueryGenerator extends SQLQueryGeneratorBase {
     }
 
     return sqlParts.join('');
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  generateCreateTableStatementInnerTail(Model, options) {
-    let fieldParts = [];
-
-    Model.iterateFields(({ field }) => {
-      if (field.type.isVirtual())
-        return;
-
-      if (field.type.isForeignKey()) {
-        let result = this.generateForeignKeyConstraint(field, field.type);
-        if (result)
-          fieldParts.push(result);
-
-        return;
-      }
-    });
-
-    return fieldParts;
-  }
-
-  _collectReturningFields(Model, model, options, context) {
-    let {
-      modelChanges,
-      dirtyFields,
-    } = context;
-
-    let returnFieldsMap = {};
-
-    for (let i = 0, il = dirtyFields.length; i < il; i++) {
-      let dirtyField = dirtyFields[i];
-
-      for (let j = 0, jl = modelChanges.length; j < jl; j++) {
-        let thisModelChanges  = modelChanges[j];
-        let dirtyStatus       = thisModelChanges[dirtyField.fieldName];
-        if (!dirtyStatus)
-          continue;
-
-        let fieldValue = dirtyStatus.current;
-        if (!(fieldValue instanceof Literals.LiteralBase))
-          continue;
-
-        if (!fieldValue.options.remote)
-          continue;
-
-        let escapedColumnName = this.escapeID(dirtyField.columnName);
-        returnFieldsMap[escapedColumnName] = true;
-
-        break;
-      }
-    }
-
-    let pkFieldName = Model.getPrimaryKeyFieldName();
-    if (pkFieldName)
-      returnFieldsMap[pkFieldName] = true;
-
-    let returnFields = Object.keys(returnFieldsMap);
-    if (!returnFields.length)
-      return;
-
-    return `RETURNING ${returnFields.join(',')}`;
   }
 
   generateInsertStatementTail(Model, model, options, context) {

@@ -3,9 +3,11 @@
 const Nife                  = require('nife');
 const moment                = require('mythix-orm/node_modules/moment');
 const Database              = require('better-sqlite3');
-const { Literals }          = require('mythix-orm');
+const { Literals, Types }   = require('mythix-orm');
 const SQLConnectionBase     = require('../../../lib/sql-connection-base');
 const SQLiteQueryGenerator  = require('./sqlite-query-generator');
+
+const DefaultHelpers = Types.DefaultHelpers;
 
 class SQLiteConnection extends SQLConnectionBase {
   static dialect = 'sqlite';
@@ -13,7 +15,8 @@ class SQLiteConnection extends SQLConnectionBase {
   constructor(_options) {
     super(_options);
 
-    this.setQueryGenerator(new SQLiteQueryGenerator(this));
+    if (!(_options && _options.queryGenerator))
+      this.setQueryGenerator(new SQLiteQueryGenerator(this));
 
     Object.defineProperties(this, {
       'db': {
@@ -23,6 +26,62 @@ class SQLiteConnection extends SQLConnectionBase {
         value:        null,
       },
     });
+
+    let options = this.getOptions();
+    if (options.emulateBigIntAutoIncrement) {
+      Object.defineProperties(this, {
+        'emulatedAutoIncrementIDs': {
+          writable:     true,
+          enumberable:  false,
+          configurable: true,
+          value:        new Map(),
+        },
+      });
+    }
+  }
+
+  getEmulatedAutoIncrementID(Model, field) {
+    let options = this.getOptions();
+    if (!(options && options.emulateBigIntAutoIncrement))
+      return;
+
+    let table = this.emulatedAutoIncrementIDs.get(Model);
+    if (!table) {
+      table = new Map();
+      this.emulatedAutoIncrementIDs.set(Model, table);
+    }
+
+    let counter = table.get(field);
+    if (!counter)
+      counter = BigInt(0);
+
+    counter = counter + BigInt(1);
+    table.set(field, counter);
+
+    return Number(counter).valueOf();
+  }
+
+  resetEmulatedAutoIncrementID(Model, field) {
+    let options = this.getOptions();
+    if (!(options && options.emulateBigIntAutoIncrement))
+      return;
+
+    let table = this.emulatedAutoIncrementIDs.get(Model);
+    if (!table)
+      return;
+
+    // If no field provided, then reset the entire
+    // table. This is used for "truncate".
+    if (!field) {
+      this.emulatedAutoIncrementIDs.set(Model, new Map());
+      return;
+    }
+
+    let counter = table.get(field);
+    if (!counter)
+      return;
+
+    table.set(field, BigInt(0));
   }
 
   getDefaultOrder(Model, _options) {
@@ -31,10 +90,14 @@ class SQLiteConnection extends SQLConnectionBase {
     if (result)
       return result;
 
-    let escapedTableName  = this.escapeID(Model.getTableName());
+    let escapedTableName  = this.escapeID(Model.getTableName(this));
     let escapedFieldName  = this.escapeID('rowid');
 
     return [ new Literals.Literal(`${escapedTableName}.${escapedFieldName} ${(options.reverseOrder === true) ? 'DESC' : 'ASC'}`) ];
+  }
+
+  isStarted() {
+    return !!this.db;
   }
 
   async start() {
@@ -58,10 +121,23 @@ class SQLiteConnection extends SQLConnectionBase {
     this.db = null;
   }
 
-  getDefaultFieldValue(type) {
+  getDefaultFieldValue(type, context) {
     switch (type) {
-      case 'AUTO_INCREMENT':
+      case 'AUTO_INCREMENT': {
+        let options = this.getOptions();
+        let field   = context.field;
+
+        if (field.primaryKey !== true) {
+          if (!(options && options.emulateBigIntAutoIncrement))
+            throw new Error('SQLiteConnection: AUTOINCREMENT isn\'t supported with BIGINT. You can silently convert to INTEGER for proper support if you pass "emulateBigIntAutoIncrement: true" to your connection options.');
+
+          // No default for create table...
+          // we will be emulating AUTOINCREMENT
+          return new Literals.Literal('', { noDefaultStatementOnCreateTable: true, remote: true });
+        }
+
         return new Literals.Literal('AUTOINCREMENT', { noDefaultStatementOnCreateTable: true, remote: true });
+      }
       case 'DATETIME_NOW':
         return new Literals.Literal('(STRFTIME(\'%Y-%m-%d %H:%M:%f\', \'NOW\'))', { escape: false, remote: true });
       case 'DATE_NOW':
@@ -73,6 +149,33 @@ class SQLiteConnection extends SQLConnectionBase {
       default:
         return type;
     }
+  }
+
+  dirtyFieldHelper({ options, field }) {
+    if (!(options && options.insert))
+      return;
+
+    let connectionOptions = this.getOptions();
+    if (!(connectionOptions && connectionOptions.emulateBigIntAutoIncrement))
+      return;
+
+    if (typeof field.defaultValue !== 'function')
+      return;
+
+    if (field.type.getDisplayName() !== 'BIGINT')
+      return;
+
+    if (field.defaultValue !== DefaultHelpers.AUTO_INCREMENT)
+      return;
+
+    return this.getEmulatedAutoIncrementID(field.Model, field);
+  }
+
+  async pragma(sql) {
+    if (!this.db)
+      return;
+
+    return await this.db.pragma(sql);
   }
 
   async exec(sql) {
@@ -87,13 +190,14 @@ class SQLiteConnection extends SQLConnectionBase {
       return;
 
     let options = _options || {};
+    let logger  = options.logger || (this.getOptions().logger);
 
     try {
       let statement   = this.db.prepare(sql);
       let methodName  = ((/^\s*SELECT\s+|RETURNING/i).test(sql)) ? 'all' : 'run';
       let parameters  = (Nife.isNotEmpty(options.parameters)) ? [].concat(parameters) : [];
 
-      if (options.logger)
+      if (logger)
         console.log('QUERY: ', sql);
 
       if (methodName === 'all')
@@ -106,9 +210,9 @@ class SQLiteConnection extends SQLConnectionBase {
 
       return result;
     } catch (error) {
-      if (options.logger) {
-        options.logger.error(error);
-        options.logger.error('QUERY: ', sql);
+      if (logger) {
+        logger.error(error);
+        logger.error('QUERY: ', sql);
       }
 
       throw error;
@@ -117,7 +221,7 @@ class SQLiteConnection extends SQLConnectionBase {
 
   async transaction(callback, _options) {
     let options       = _options || {};
-    let inheritedThis = Object.create(options.transaction || this);
+    let inheritedThis = Object.create(options.connection || this);
     let savePointName;
 
     if (inheritedThis.inTransaction !== true) {
@@ -157,17 +261,39 @@ class SQLiteConnection extends SQLConnectionBase {
     };
   }
 
-  async truncate(Model) {
-    global.debug = true;
-    let result = await this.destroy(Model);
-    global.debug = false;
+  async truncate(Model, options) {
+    let result = await this.destroy(Model, null, options);
 
     // Update the autoincrement sequence for this table
-    let sqlStr = `UPDATE sqlite_sequence SET seq=0 WHERE name='${Model.getTableName()}'`;
-    await this.query(sqlStr);
+    try {
+      this.resetEmulatedAutoIncrementID(Model);
 
+      let sqlStr = `UPDATE "sqlite_sequence" SET "seq"=0 WHERE "name"='${Model.getTableName(this)}'`;
+      await this.query(sqlStr, options);
+    } catch (error) {
+      if (error.message !== 'no such table: sqlite_sequence')
+        throw error;
+    }
 
     return result;
+  }
+
+  _floatTypeToString() {
+    return 'REAL';
+  }
+
+  _bigintTypeToString(type, _options) {
+    let options = _options || {};
+
+    if (options.createTable && options.defaultValue === 'AUTOINCREMENT') {
+      let options = this.getOptions();
+      if (!(options && options.emulateBigIntAutoIncrement))
+        throw new Error('SQLiteConnection: AUTOINCREMENT isn\'t supported with BIGINT. You can silently convert to INTEGER for proper support if you pass "emulateBigIntAutoIncrement: true" to your connection options.');
+
+      return 'INTEGER';
+    }
+
+    return 'BIGINT';
   }
 }
 

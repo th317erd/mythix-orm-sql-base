@@ -2,7 +2,7 @@
 
 'use strict';
 
-/* global describe, it, expect, beforeEach */
+/* global describe, it, expect, beforeAll */
 
 const { Literals }          = require('mythix-orm');
 const { SQLiteConnection }  = require('../../../support/sqlite-connection');
@@ -13,9 +13,11 @@ describe('SQLiteConnection', () => {
     let User;
     let Role;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       connection = new SQLiteConnection({
-        models: require('../../../support/models'),
+        emulateBigIntAutoIncrement: true,
+        bindModels:                 false,
+        models:                     require('../../../support/models'),
       });
 
       let models = connection.getModels();
@@ -103,12 +105,14 @@ describe('SQLiteConnection', () => {
 
     describe('stop', () => {
       it('can shutdown a DB connection', async () => {
-        expect(connection.db).toBe(null);
-        await connection.start();
-        expect(connection.db).not.toBe(null);
+        let testConnection = new SQLiteConnection();
 
-        await connection.stop();
-        expect(connection.db).toBe(null);
+        expect(testConnection.db).toBe(null);
+        await testConnection.start();
+        expect(testConnection.db).not.toBe(null);
+
+        await testConnection.stop();
+        expect(testConnection.db).toBe(null);
       });
     });
 
