@@ -21,24 +21,24 @@ class UserThing extends Model {
       index:        true,
     },
     'roleThing': {
-      type:         Types.Model(({ RoleThing, args, self }) => {
-        let { query } = args;
-        return RoleThing.$.id.EQ(self.roleThingID).MERGE(query);
+      type:         Types.Model(({ RoleThing, userQuery, self }) => {
+        return RoleThing.$.id.EQ(self.roleThingID).MERGE(userQuery);
       }),
     },
     'role': {
-      type:         Types.Model(({ Role, RoleThing, args, self }) => {
-        let { query } = args;
+      type:         Types.Model(({ Role, RoleThing, userQuery, self }) => {
         return Role
           .$.id
             .EQ(RoleThing.$.roleID)
           .RoleThing.id
             .EQ(self.roleThingID)
-          .MERGE(query);
+          .MERGE(userQuery);
       }),
     },
     'user': {
-      type:         Types.Model('User:id', 'userID'),
+      type:         Types.Model(({ User, userQuery, self }) => {
+        return User.$.id.EQ(self.userID).MERGE(userQuery);
+      }),
     },
   };
 }

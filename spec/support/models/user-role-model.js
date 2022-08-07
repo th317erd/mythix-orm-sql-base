@@ -21,15 +21,13 @@ class UserRole extends Model {
       index:        true,
     },
     'role': {
-      type:         Types.Model(({ Role, args, self }) => {
-        let { query } = args;
-        return Role.$.id.EQ(self.roleID).MERGE(query);
+      type:         Types.Model(({ Role, userQuery, self }) => {
+        return Role.$.id.EQ(self.roleID).MERGE(userQuery);
       }),
     },
     'user': {
-      type:         Types.Model(({ User, args, self }) => {
-        let { query } = args;
-        return User.$.id.EQ(self.userID).MERGE(query);
+      type:         Types.Model(({ User, userQuery, self }) => {
+        return User.$.id.EQ(self.userID).MERGE(userQuery);
       }),
     },
   };

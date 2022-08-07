@@ -12,7 +12,7 @@ const {
   truncateTables,
 } = require('../sqlite-connection-helper');
 
-describe('SQLiteConnection', () => {
+fdescribe('SQLiteConnection', () => {
   describe('1x1 relational operations', () => {
     let connection;
     let User;
@@ -39,9 +39,15 @@ describe('SQLiteConnection', () => {
     });
 
     describe('create single-relational models', () => {
-      fit('can properly generate a query', async () => {
-        let user = new User({ firstName: 'Mary', lastName: 'Anne', primaryRoleID: '5016a9dc-0271-41a0-937a-a0c95acd117b' });
-        expect((await user.queryForUserThingRole()).toSQL()).toEqual('SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name" FROM "roles" INNER JOIN "role_things" ON "role_things"."roleID" = "roles"."id" INNER JOIN "user_things" ON "user_things"."roleThingID" = "role_things"."id" WHERE "user_things"."userID" = \'be146952-c48f-43ae-b160-f53a97a13fcf\' ORDER BY "roles"."rowid" ASC');
+      it('can properly generate a query', async () => {
+        let user = new User({
+          id:             '664e9071-11d9-4544-85fe-1359ce1904b1',
+          firstName:      'Mary',
+          lastName:       'Anne',
+          primaryRoleID:  '5016a9dc-0271-41a0-937a-a0c95acd117b',
+        });
+
+        expect((await user.queryForUserThingRole()).toSQL()).toEqual('SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name" FROM "roles" INNER JOIN "role_things" ON "role_things"."roleID" = "roles"."id" INNER JOIN "user_things" ON "user_things"."roleThingID" = "role_things"."id" WHERE "user_things"."userID" = \'664e9071-11d9-4544-85fe-1359ce1904b1\' ORDER BY "roles"."rowid" ASC');
       });
 
       it('can create a single model through a relational field', async () => {
@@ -56,7 +62,7 @@ describe('SQLiteConnection', () => {
         expect(primaryRole).toBe(undefined);
 
         expect(user.primaryRoleID).toBe(null);
-        primaryRole = await user.createPrimaryRole({ name: 'admin' });
+        primaryRole = await user.createPrimaryRole({ name: 'admin' }, { logger: console });
         expect(user.primaryRoleID).not.toBe(null);
         expect(primaryRole).toBeInstanceOf(Role);
         expect(primaryRole.name).toEqual('admin');
@@ -66,7 +72,7 @@ describe('SQLiteConnection', () => {
         expect(primaryRole.name).toEqual('admin');
       });
 
-      it('can create a single model through a relational field using a through table', async () => {
+      fit('can create a single model through a relational field using a through table', async () => {
         let user = await User.create({ firstName: 'Space', lastName: 'Pants' });
         expect(user).toBeInstanceOf(User);
         expect(user.id).toMatch(UUID_REGEXP);
@@ -74,7 +80,7 @@ describe('SQLiteConnection', () => {
         expect(await UserThing.count()).toEqual(0);
         expect(await RoleThing.count()).toEqual(0);
 
-        let storedRole = await user.createUserThingRole({ name: 'admin' });
+        let storedRole = await user.createUserThingRole({ name: 'admin' }, { logger: console });
         expect(storedRole).toBeInstanceOf(Role);
 
         expect(await UserThing.count()).toEqual(1);
