@@ -205,6 +205,9 @@ class SQLiteConnection extends SQLConnectionBase {
 
       let result = await statement[methodName](...parameters);
 
+      // if (logger)
+      //   console.log('QUERY RESULT: ', result);
+
       if (methodName === 'all')
         return this.formatResultsResponse(sql, statement.columns(), result);
 

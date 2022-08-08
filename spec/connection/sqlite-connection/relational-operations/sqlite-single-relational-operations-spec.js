@@ -12,7 +12,7 @@ const {
   truncateTables,
 } = require('../sqlite-connection-helper');
 
-fdescribe('SQLiteConnection', () => {
+describe('SQLiteConnection', () => {
   describe('1x1 relational operations', () => {
     let connection;
     let User;
@@ -62,7 +62,7 @@ fdescribe('SQLiteConnection', () => {
         expect(primaryRole).toBe(undefined);
 
         expect(user.primaryRoleID).toBe(null);
-        primaryRole = await user.createPrimaryRole({ name: 'admin' }, { logger: console });
+        primaryRole = await user.createPrimaryRole({ name: 'admin' });
         expect(user.primaryRoleID).not.toBe(null);
         expect(primaryRole).toBeInstanceOf(Role);
         expect(primaryRole.name).toEqual('admin');
@@ -72,7 +72,7 @@ fdescribe('SQLiteConnection', () => {
         expect(primaryRole.name).toEqual('admin');
       });
 
-      fit('can create a single model through a relational field using a through table', async () => {
+      it('can create a single model through a relational field using a through table', async () => {
         let user = await User.create({ firstName: 'Space', lastName: 'Pants' });
         expect(user).toBeInstanceOf(User);
         expect(user.id).toMatch(UUID_REGEXP);
@@ -80,13 +80,13 @@ fdescribe('SQLiteConnection', () => {
         expect(await UserThing.count()).toEqual(0);
         expect(await RoleThing.count()).toEqual(0);
 
-        let storedRole = await user.createUserThingRole({ name: 'admin' }, { logger: console });
+        let storedRole = await user.createUserThingRole({ name: 'admin' });
         expect(storedRole).toBeInstanceOf(Role);
 
         expect(await UserThing.count()).toEqual(1);
         expect(await RoleThing.count()).toEqual(1);
 
-        let userThing = await user.getUserThing();
+        let userThing = await user.getUserThing(null);
         expect(userThing).toBeInstanceOf(UserThing);
 
         let roleThing = await userThing.getRoleThing();
