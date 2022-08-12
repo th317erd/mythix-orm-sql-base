@@ -36,7 +36,7 @@
     "mythix-orm": "^1.0.0"
   },
   "dependencies": {
-    "nife": "^1.11.2",
+    "nife": "^1.11.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
