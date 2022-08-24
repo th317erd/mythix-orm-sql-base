@@ -40,6 +40,56 @@ describe('SQLiteConnection', () => {
     });
   });
 
+  describe('getLockMode', () => {
+    it('should be able to get the lock mode when no options are specified', async () => {
+      expect(connection.getLockMode()).toEqual({ lock: false, read: false, write: false });
+    });
+
+    it('should be able to get the lock mode when a modelName is specified', async () => {
+      expect(connection.getLockMode('User')).toEqual({ lock: true, modelName: 'User', read: true, write: true });
+    });
+
+    it('should fail when a bad modelName is specified', async () => {
+      try {
+        connection.getLockMode('User2');
+        fail('unreachable');
+      } catch (error) {
+        expect(error.message).toMatch(/"lock" must be the name of a model/);
+      }
+    });
+
+    it('should fail when a bad value is provided', async () => {
+      try {
+        connection.getLockMode(10);
+        fail('unreachable');
+      } catch (error) {
+        expect(error.message).toMatch(/"lock" must be the name of a model/);
+      }
+    });
+
+    it('should fail when an options object is provided with no "modelName" key', async () => {
+      try {
+        connection.getLockMode({});
+        fail('unreachable');
+      } catch (error) {
+        expect(error.message).toMatch(/"lock" must be the name of a model/);
+      }
+    });
+
+    it('should fail when an options object is provided with bad "modelName" key', async () => {
+      try {
+        connection.getLockMode({ modelName: 'User2' });
+        fail('unreachable');
+      } catch (error) {
+        expect(error.message).toMatch(/"lock" must be the name of a model/);
+      }
+    });
+
+    it('should succeed when an options object is provided with "modelName" key', async () => {
+      expect(connection.getLockMode({ modelName: 'User' })).toEqual({ lock: true, modelName: 'User', read: true, write: true });
+    });
+  });
+
   describe('transaction', () => {
     it('should be able to create a transaction', async () => {
       let statements = [];
