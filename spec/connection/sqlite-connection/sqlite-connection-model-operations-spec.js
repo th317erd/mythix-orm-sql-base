@@ -132,8 +132,9 @@ describe('SQLiteConnection', () => {
             email:      'test@example.com',
             firstName:  'Mary',
             lastName:   'Anne',
-            createdAt:   '07.30.2022 22:39:01',
-            updatedAt:   '07.30.2022 22:39:01',
+            createdAt:  '07.30.2022 22:39:01',
+            updatedAt:  '07.30.2022 22:39:01',
+            metadata:   { test: true, hello: 'world' },
           }),
         ];
 
@@ -141,9 +142,26 @@ describe('SQLiteConnection', () => {
 
         let user      = await models.ExtendedUser.where.first();
         let result    = JSON.stringify(user);
-        let expected  = '{"id":1,"createdAt":"07.30.2022 22:39:01","email":"test@example.com","firstName":"Mary","lastName":"Anne","playerType":"wizard","primaryRoleID":null,"updatedAt":"07.30.2022 22:39:01"}';
+        let expected  = '{"id":1,"createdAt":"07.30.2022 22:39:01","email":"test@example.com","firstName":"Mary","lastName":"Anne","metadata":{"test":true,"hello":"world"},"playerType":"wizard","primaryRoleID":null,"updatedAt":"07.30.2022 22:39:01"}';
 
         expect(result).toEqual(expected);
+
+        // Ensure that the "metadata" is not
+        // marking itself as dirty
+        expect(user.isDirty()).toEqual(false);
+        expect(await user.save()).toEqual(false);
+
+        // Now make "metadata" internal value dirty
+        user.metadata.cool = 'beans';
+        expect(user.isDirty()).toEqual(true);
+        expect(await user.save()).toBeInstanceOf(models.ExtendedUser);
+
+        user = await models.ExtendedUser.where.first();
+        expect(user.metadata).toEqual({
+          cool:   'beans',
+          test:   true,
+          hello:  'world',
+        });
       });
     });
 

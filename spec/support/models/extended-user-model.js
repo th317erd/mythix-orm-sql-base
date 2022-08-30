@@ -32,6 +32,10 @@ class ExtendedUser extends User {
       defaultValue: 'wizard',
       allowNull:    false,
     },
+    'metadata': {
+      type:         Types.SERIALIZED(Types.STRING(256)),
+      allowNull:    true,
+    },
   });
 }
 

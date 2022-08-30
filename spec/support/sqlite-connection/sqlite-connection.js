@@ -198,7 +198,7 @@ class SQLiteConnection extends SQLConnectionBase {
       let parameters  = (Nife.isNotEmpty(options.parameters)) ? [].concat(parameters) : [];
 
       if (logger)
-        console.log('QUERY: ', sql);
+        console.log(`QUERY: ${sql}`);
 
       if (methodName === 'all')
         statement.raw(true);
@@ -215,7 +215,7 @@ class SQLiteConnection extends SQLConnectionBase {
     } catch (error) {
       if (logger) {
         logger.error(error);
-        logger.error('QUERY: ', sql);
+        logger.error(`QUERY: ${sql}`);
       }
 
       throw error;
@@ -281,7 +281,13 @@ class SQLiteConnection extends SQLConnectionBase {
     return result;
   }
 
-  _floatTypeToString() {
+  // eslint-disable-next-line no-unused-vars
+  _numericTypeToString(type) {
+    return 'REAL';
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  _realTypeToString(type) {
     return 'REAL';
   }
 
