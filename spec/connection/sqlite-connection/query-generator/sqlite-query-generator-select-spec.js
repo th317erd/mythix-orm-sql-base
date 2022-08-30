@@ -473,6 +473,21 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryString).toEqual('SELECT "users"."firstName" AS "User:firstName","users"."id" AS "User:id","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE ("users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\') AND ("users"."lastName" = \'Derp\' OR "users"."lastName" = \'Burp\') ORDER BY "users"."rowid" ASC');
     });
 
+    it('can generate a select statement from a merged query', () => {
+      let queryGenerator  = connection.getQueryGenerator();
+      let query = User.where
+        .primaryRoleID
+          .EQ(Role.where.id)
+        .id.EQ('test')
+        .AND(
+          Role.where.name.EQ('admin')
+          .OR.MERGE(User.where.AND.firstName.EQ('Bob').OR.lastName.EQ('Brown')),
+        );
+
+      let queryString     = queryGenerator.generateSelectStatement(query);
+      expect(queryString).toEqual('SELECT "users"."firstName" AS "User:firstName","users"."id" AS "User:id","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."id" = \'test\' AND ("roles"."name" = \'admin\' OR "users"."firstName" = \'Bob\' OR "users"."lastName" = \'Brown\') ORDER BY "users"."rowid" ASC');
+    });
+
     it('can generate a select statement with an order, limit, and offset', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let queryString     = queryGenerator.generateSelectStatement(
