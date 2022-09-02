@@ -1,6 +1,6 @@
 {
   "name": "mythix-orm-sql-base",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "SQL base support for Mythix ORM",
   "main": "lib/index.js",
   "type": "commonjs",
