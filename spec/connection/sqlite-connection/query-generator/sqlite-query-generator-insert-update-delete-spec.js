@@ -345,6 +345,13 @@ describe('SQLiteQueryGenerator', () => {
       expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ORDER BY "users"."id" ASC LIMIT 50 OFFSET 10');
     });
 
+    it('should generate a delete statement and force a limit if an order is specified', () => {
+      let queryGenerator  = connection.getQueryGenerator();
+      let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.LIKE('%bob%').ORDER('firstName'));
+
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ORDER BY "users"."firstName" ASC LIMIT 4294967295 OFFSET 0');
+    });
+
     it('should generate a delete statement with a table join', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.primaryRoleID.EQ(Role.where.id).firstName.LIKE('%bob%').ORDER('User:firstName').LIMIT(50).OFFSET(10));
