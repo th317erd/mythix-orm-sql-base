@@ -319,10 +319,10 @@ describe('SQLiteQueryGenerator', () => {
     });
 
     it('can generate a query condition (using literals)', () => {
-      const queryPart = { Model: User, Field: User.fields.id, not: false, operator: new Literals.Literal('EXISTS IN') };
+      const queryPart = { Model: User, Field: User.fields.id, not: false, operator: new Literals.Literal('IN') };
 
       let queryGenerator = connection.getQueryGenerator();
-      expect(queryGenerator.generateSelectQueryCondition(queryPart, new Literals.Literal('(1,2,3,4)'))).toEqual('"users"."id" EXISTS IN (1,2,3,4)');
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, new Literals.Literal('(1,2,3,4)'))).toEqual('"users"."id" IN (1,2,3,4)');
     });
   });
 
