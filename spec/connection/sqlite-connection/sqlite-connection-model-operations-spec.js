@@ -154,7 +154,7 @@ describe('SQLiteConnection', () => {
         // Now make "metadata" internal value dirty
         user.metadata.cool = 'beans';
         expect(user.isDirty()).toEqual(true);
-        expect(await user.save()).toBeInstanceOf(models.ExtendedUser);
+        expect(await user.save()).toBe(true);
 
         user = await models.ExtendedUser.where.first();
         expect(user.metadata).toEqual({
