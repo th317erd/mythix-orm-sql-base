@@ -2,7 +2,7 @@
   "name": "mythix-orm-sql-base",
   "version": "1.4.8",
   "description": "SQL base support for Mythix ORM",
-  "main": "lib/index.js",
+  "main": "lib/index",
   "type": "commonjs",
   "scripts": {
     "coverage": "clear ; node ./node_modules/.bin/nyc ./node_modules/.bin/jasmine",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/th317erd/mythix-orm-sql-base#readme",
   "peerDependencies": {
-    "mythix-orm": "^1.5.6"
+    "mythix-orm": "^1.6.2"
   },
   "dependencies": {
     "nife": "^1.11.3",

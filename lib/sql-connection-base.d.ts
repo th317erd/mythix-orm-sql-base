@@ -1,5 +1,5 @@
-import { ConnectionBase, Field, ModelClass, QueryEngine, QueryResults, Model } from "mythix-orm";
-import { GenericObject } from "mythix-orm/lib/interfaces/common";
+import { ConnectionBase, Field, ModelClass, QueryEngine, QueryResults, Model } from 'mythix-orm';
+import { GenericObject } from 'mythix-orm/lib/interfaces/common';
 
 export declare interface ModelDataFromQueryResults {
   [ key: string ]: Array<GenericObject>;
@@ -32,3 +32,5 @@ declare class SQLConnectionBase extends ConnectionBase {
     results: QueryResults
   ): Array<Model>;
 }
+
+export default SQLConnectionBase;

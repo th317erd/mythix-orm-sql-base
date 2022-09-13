@@ -21,7 +21,7 @@ class SQLiteConnection extends SQLConnectionBase {
     Object.defineProperties(this, {
       'db': {
         writable:     true,
-        enumerable:  false,
+        enumerable:   false,
         configurable: true,
         value:        null,
       },
@@ -32,7 +32,7 @@ class SQLiteConnection extends SQLConnectionBase {
       Object.defineProperties(this, {
         'emulatedAutoIncrementIDs': {
           writable:     true,
-          enumerable:  false,
+          enumerable:   false,
           configurable: true,
           value:        new Map(),
         },
