@@ -36,14 +36,14 @@
     "mythix-orm": "^1.6.2"
   },
   "dependencies": {
-    "nife": "^1.11.3",
-    "uuid": "^8.3.2"
+    "nife": "^1.12.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@spothero/eslint-plugin-spothero": "github:spothero/eslint-plugin-spothero",
     "better-sqlite3": "^7.6.2",
-    "eslint": "^8.13.0",
-    "jasmine": "^4.3.0",
+    "eslint": "^8.23.1",
+    "jasmine": "^4.4.0",
     "moment": "^2.29.4",
     "nyc": "^15.1.0"
   },
