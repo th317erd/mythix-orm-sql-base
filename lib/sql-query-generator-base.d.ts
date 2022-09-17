@@ -100,7 +100,6 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
   public generateColumnIndexes(
     Model: ModelClass,
     field: Field,
-    indexes: string | boolean | Array<string | boolean | Array<string>>,
     options?: GenericObject,
   ): Array<string>;
 

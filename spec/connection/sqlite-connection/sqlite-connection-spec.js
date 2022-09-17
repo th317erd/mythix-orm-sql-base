@@ -13,8 +13,12 @@ describe('SQLiteConnection', () => {
   let connection;
 
   beforeAll(async () => {
-    let setup = await createConnection();
-    connection = setup.connection;
+    try {
+      let setup = await createConnection();
+      connection = setup.connection;
+    } catch (error) {
+      console.error('Error in beforeAll: ', error);
+    }
   });
 
   afterEach(async () => {

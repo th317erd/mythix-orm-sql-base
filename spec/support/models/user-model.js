@@ -13,12 +13,12 @@ class User extends Model {
     'firstName': {
       type:         Types.STRING(64),
       allowNull:    true,
-      index:        true,
+      index:        [ true, 'lastName' ],
     },
     'lastName': {
       type:         Types.STRING(64),
       allowNull:    true,
-      index:        true,
+      index:        [ true, 'firstName' ],
     },
     'primaryRoleID': {
       type:         Types.FOREIGN_KEY('Role:id', { onDelete: 'SET NULL', onUpdate: 'SET NULL' }),
