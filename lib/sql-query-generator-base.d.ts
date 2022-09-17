@@ -93,8 +93,7 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
 
   public generateIndexName(
     Model: ModelClass,
-    field: Field,
-    index: string | true,
+    indexFieldNames: Array<string>,
     options?: GenericObject
   ): string;
 
@@ -162,6 +161,16 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
 
   public generateDeleteStatement(Model: ModelClass, queryEngine: QueryEngine, options?: GenericObject): string;
   public generateTruncateTableStatement(Model: ModelClass, options?: GenericObject): string;
+  public generateAlterTableStatement(Model: ModelClass, newModelAttributes, options?: GenericObject): string;
+  public generateDropColumnStatement(field: Field, options?: GenericObject): string;
+  public generateAlterColumnRenameStatement(field: Field, newField: Field, options?: GenericObject): string;
+  public generateAlterColumnSetOrDropNullConstraintStatement(field: Field, newField: Field, options?: GenericObject): string;
+  public generateAlterColumnSetDefaultStatement(field: Field, newField: Field, newDefaultValue: any, options?: GenericObject): string;
+  public generateAlterColumnChangeTypeStatement(field: Field, newField: Field, newFieldType: string, options?: GenericObject): string;
+  public generateAlterColumnChangePrimaryKeyConstraintStatement(field: Field, newField: Field, options?: GenericObject): string;
+  public generateAlterColumnChangeUniqueConstraintStatement(field: Field, newField: Field, options?: GenericObject): string;
+  public generateAlterColumnStatements(field: Field, newFieldAttributes: GenericObject, options?: GenericObject): Array<string>;
+  public generateAddColumnStatement(field: Field, options?: GenericObject): string;
 
   public _collectRemoteReturningFields(Model: ModelClass): Array<string>;
   public _collectReturningFields(
