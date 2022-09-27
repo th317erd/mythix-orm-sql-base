@@ -15,45 +15,28 @@ class SQLiteQueryGenerator extends SQLQueryGeneratorBase {
     return joinType;
   }
 
-  generateForeignKeyConstraint(field, type) {
-    let options     = type.getOptions();
-    let targetModel = type.getTargetModel(this.connection);
-    let targetField = type.getTargetField(this.connection);
-
-    let sqlParts = [
-      'FOREIGN KEY(',
-      this.escapeID(field.columnName),
-      ') REFERENCES ',
-      this.escapeID(targetModel.getTableName(this.connection)),
-      '(',
-      this.escapeID(targetField.columnName),
-      ')',
-    ];
-
-    if (options.deferred === true) {
-      sqlParts.push(' ');
-      sqlParts.push('DEFERRABLE INITIALLY DEFERRED');
-    }
-
-    if (options.onDelete) {
-      sqlParts.push(' ');
-      sqlParts.push(`ON DELETE ${options.onDelete.toUpperCase()}`);
-    }
-
-    if (options.onUpdate) {
-      sqlParts.push(' ');
-      sqlParts.push(`ON UPDATE ${options.onUpdate.toUpperCase()}`);
-    }
-
-    return sqlParts.join('');
-  }
-
   generateInsertStatementTail(Model, model, options, context) {
     return this._collectReturningFields(Model, model, options, context);
   }
 
   generateUpdateStatementTail(Model, model, options, context) {
     return this._collectReturningFields(Model, model, options, context);
+  }
+
+  generateConditionPostfix({ sqlOperator }) {
+    if (sqlOperator === 'LIKE' || sqlOperator === 'NOT LIKE')
+      return 'ESCAPE \'\\\'';
+
+    return '';
+  }
+
+  generateSelectQueryOperatorFromQueryEngineOperator(queryPart, operator, value, valueIsReference, options) {
+    let sqlOperator = super.generateSelectQueryOperatorFromQueryEngineOperator(queryPart, operator, value, valueIsReference, options);
+
+    if ((sqlOperator === 'LIKE' || sqlOperator === 'NOT LIKE') && queryPart.caseSensitive === true)
+      throw new Error(`${this.constructor.name}::generateSelectQueryOperatorFromQueryEngineOperator: "{ caseSensitive: true }" is not supported for this connection type for the "${sqlOperator}" operator.`);
+
+    return sqlOperator;
   }
 }
 

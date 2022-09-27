@@ -1,7 +1,7 @@
 'use strict';
 
 const Nife                  = require('nife');
-const moment                = require('moment');
+const { DateTime }          = require('luxon');
 const Database              = require('better-sqlite3');
 const { Literals, Types }   = require('mythix-orm');
 const SQLConnectionBase     = require('../../../lib/sql-connection-base');
@@ -139,13 +139,13 @@ class SQLiteConnection extends SQLConnectionBase {
         return new Literals.Literal('AUTOINCREMENT', { noDefaultStatementOnCreateTable: true, remote: true });
       }
       case 'DATETIME_NOW':
-        return new Literals.Literal('(STRFTIME(\'%Y-%m-%d %H:%M:%f\', \'NOW\'))', { escape: false, remote: true });
+        return new Literals.Literal('(STRFTIME(\'%s\',\'now\')||SUBSTR(STRFTIME(\'%f\',\'now\'),4))', { escape: false, remote: true });
       case 'DATE_NOW':
-        return new Literals.Literal('(STRFTIME(\'%Y-%m-%d\', \'NOW\'))', { escape: false, remote: true });
+        return new Literals.Literal('(STRFTIME(\'%s\',\'now\')||SUBSTR(STRFTIME(\'%f\',\'now\'),4))', { escape: false, remote: true });
       case 'DATETIME_NOW_LOCAL':
-        return moment.utc().toDate();
+        return DateTime.now().toMillis();
       case 'DATE_NOW_LOCAL':
-        return moment.utc().startOf('day').toDate();
+        return DateTime.now().startOf('day').toMillis();
       default:
         return type;
     }
@@ -289,6 +289,16 @@ class SQLiteConnection extends SQLConnectionBase {
   // eslint-disable-next-line no-unused-vars
   _realTypeToString(type) {
     return 'REAL';
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  _dateTypeToString(type) {
+    return 'BIGINT';
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  _datetimeTypeToString(type) {
+    return 'BIGINT';
   }
 
   _bigintTypeToString(type, _options) {

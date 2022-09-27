@@ -342,21 +342,21 @@ describe('SQLiteQueryGenerator', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.LIKE('%bob%').ORDER('id').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ORDER BY "users"."id" ASC LIMIT 50 OFFSET 10');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' ORDER BY "users"."id" ASC LIMIT 50 OFFSET 10');
     });
 
     it('should generate a delete statement and force a limit if an order is specified', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.LIKE('%bob%').ORDER('firstName'));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ORDER BY "users"."firstName" ASC LIMIT 4294967295 OFFSET 0');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' ORDER BY "users"."firstName" ASC LIMIT 4294967295 OFFSET 0');
     });
 
     it('should generate a delete statement with a table join', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.primaryRoleID.EQ(Role.where.id).firstName.LIKE('%bob%').ORDER('User:firstName').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1,"users"."firstName" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' AND "users"."id" = "_users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10)');
+      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1,"users"."firstName" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' AND "users"."id" = "_users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10)');
     });
 
     it('should generate a delete statement with a where clause, and an order, limit, and offset', () => {

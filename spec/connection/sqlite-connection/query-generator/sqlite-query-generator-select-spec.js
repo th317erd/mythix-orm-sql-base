@@ -276,7 +276,7 @@ describe('SQLiteQueryGenerator', () => {
           expect(error).toMatch(/Invalid value provided to operator "LIKE"/);
         }
 
-      expect(queryGenerator.generateSelectQueryCondition(queryPart, 'derp')).toEqual('"users"."id" LIKE \'derp\'');
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, 'derp')).toEqual('"users"."id" LIKE \'derp\' ESCAPE \'\\\'');
     });
 
     it('can generate a query condition (NOT LIKE)', () => {
@@ -315,7 +315,7 @@ describe('SQLiteQueryGenerator', () => {
           expect(error).toMatch(/Invalid value provided to operator "NOT_LIKE"/);
         }
 
-      expect(queryGenerator.generateSelectQueryCondition(queryPart, 'derp')).toEqual('"users"."id" NOT LIKE \'derp\'');
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, 'derp')).toEqual('"users"."id" NOT LIKE \'derp\' ESCAPE \'\\\'');
     });
 
     it('can generate a query condition (using literals)', () => {
