@@ -440,6 +440,97 @@ describe('SQLiteConnection', () => {
           fail('unreachable');
         }
       });
+
+      it('can have model changes available in onAfterCreate hook', async () => {
+        let validationModels = [
+          new models.ValidationTest({
+            number:     55,
+            boolean:    true,
+            date:       '2000-01-01',
+          }),
+        ];
+
+        let afterChanges;
+
+        validationModels[0].onAfterCreate = function() {
+          afterChanges = this.changes;
+        };
+
+        await connection.insert(models.ValidationTest, validationModels);
+        expect(afterChanges).toEqual({
+          id:       { previous: undefined, current: validationModels[0].id },
+          boolean:  { previous: undefined, current: 'true' },
+          date:     { previous: undefined, current: '2000-01-01' },
+          number:   { previous: undefined, current: '55' },
+        });
+      });
+
+      it('can have model changes available in onAfterSave hook', async () => {
+        let validationModels = [
+          new models.ValidationTest({
+            number:     55,
+            boolean:    true,
+            date:       '2000-01-01',
+          }),
+        ];
+
+        let afterChanges;
+
+        validationModels[0].onAfterSave = function() {
+          afterChanges = this.changes;
+        };
+
+        await connection.insert(models.ValidationTest, validationModels);
+        expect(afterChanges).toEqual({
+          id:       { previous: undefined, current: validationModels[0].id },
+          boolean:  { previous: undefined, current: 'true' },
+          date:     { previous: undefined, current: '2000-01-01' },
+          number:   { previous: undefined, current: '55' },
+        });
+
+        afterChanges = undefined;
+
+        validationModels[0].number = 42;
+        validationModels[0].boolean = false;
+        validationModels[0].date = '2001-01-01';
+
+        await validationModels[0].save();
+        expect(afterChanges).toEqual({
+          boolean:  { previous: 'true', current: 'false' },
+          date:     { previous: '2000-01-01', current: '2001-01-01' },
+          number:   { previous: '55', current: '42' },
+        });
+      });
+
+      it('can have model changes available in onAfterUpdate hook', async () => {
+        let validationModels = [
+          new models.ValidationTest({
+            number:     55,
+            boolean:    true,
+            date:       '2000-01-01',
+          }),
+        ];
+
+        let afterChanges;
+
+        validationModels[0].onAfterUpdate = function() {
+          afterChanges = this.changes;
+        };
+
+        await connection.insert(models.ValidationTest, validationModels);
+        expect(afterChanges).toBe(undefined);
+
+        validationModels[0].number = 42;
+        validationModels[0].boolean = false;
+        validationModels[0].date = '2001-01-01';
+
+        await validationModels[0].save();
+        expect(afterChanges).toEqual({
+          boolean:  { previous: 'true', current: 'false' },
+          date:     { previous: '2000-01-01', current: '2001-01-01' },
+          number:   { previous: '55', current: '42' },
+        });
+      });
     });
   });
 });

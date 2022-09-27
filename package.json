@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/th317erd/mythix-orm-sql-base#readme",
   "peerDependencies": {
-    "mythix-orm": "^1.7.0"
+    "mythix-orm": "^1.7.1"
   },
   "dependencies": {
     "luxon": "^3.0.4",
