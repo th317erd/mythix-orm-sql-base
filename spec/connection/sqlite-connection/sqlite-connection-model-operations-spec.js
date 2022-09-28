@@ -2,10 +2,11 @@
 
 'use strict';
 
-/* global jasmine, Buffer, describe, it, expect, beforeAll, afterEach, beforeAll, spyOn, fail */
+/* global jasmine, Buffer, describe, expect, beforeAll, afterEach, beforeAll, spyOn, fail */
 
-const { Utils }     = require('mythix-orm');
-const { DateTime }  = require('luxon');
+const { Utils }         = require('mythix-orm');
+const { DateTime }      = require('luxon');
+const { createRunners } = require('../../support/test-helpers');
 
 const {
   XID_REGEXP,
@@ -21,6 +22,9 @@ describe('SQLiteConnection', () => {
   describe('model operations', () => {
     let connection;
     let models;
+
+    // eslint-disable-next-line no-unused-vars
+    const { it, fit } = createRunners(() => connection);
 
     beforeAll(async () => {
       try {

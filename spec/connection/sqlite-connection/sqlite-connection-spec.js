@@ -110,7 +110,7 @@ describe('SQLiteConnection', () => {
       });
 
       expect(statements.length).toEqual(3);
-      expect(statements[0][0]).toEqual('BEGIN');
+      expect(statements[0][0]).toEqual('BEGIN DEFERRED TRANSACTION');
       expect(statements[1][0]).toEqual('SELECT 1+1');
       expect(statements[2][0]).toEqual('COMMIT');
     });
@@ -132,7 +132,7 @@ describe('SQLiteConnection', () => {
       });
 
       expect(statements.length).toEqual(5);
-      expect(statements[0][0]).toEqual('BEGIN');
+      expect(statements[0][0]).toEqual('BEGIN DEFERRED TRANSACTION');
       expect(statements[1][0]).toMatch(/SAVEPOINT SP[A-P]{32}/);
       expect(statements[2][0]).toEqual('SELECT 1+1');
       expect(statements[3][0]).toMatch('RELEASE SAVEPOINT SP[A-P]{32}');
@@ -158,7 +158,7 @@ describe('SQLiteConnection', () => {
       } catch (error) {
         expect(error.message).toEqual('near "DERP": syntax error');
         expect(statements.length).toEqual(3);
-        expect(statements[0][0]).toEqual('BEGIN');
+        expect(statements[0][0]).toEqual('BEGIN DEFERRED TRANSACTION');
         expect(statements[1][0]).toEqual('DERP 1+1');
         expect(statements[2][0]).toEqual('ROLLBACK');
       }
@@ -185,7 +185,7 @@ describe('SQLiteConnection', () => {
       } catch (error) {
         expect(error.message).toEqual('near "DERP": syntax error');
         expect(statements.length).toEqual(5);
-        expect(statements[0][0]).toEqual('BEGIN');
+        expect(statements[0][0]).toEqual('BEGIN DEFERRED TRANSACTION');
         expect(statements[1][0]).toMatch(/SAVEPOINT SP[A-P]{32}/);
         expect(statements[2][0]).toEqual('DERP 1+1');
         expect(statements[3][0]).toMatch('ROLLBACK TO SAVEPOINT SP[A-P]{32}');

@@ -3,10 +3,11 @@
 
 'use strict';
 
-/* global describe, it, expect, beforeAll, fail */
+/* global describe, expect, beforeAll, fail */
 
 const { Literals }          = require('mythix-orm');
 const { SQLiteConnection }  = require('../../../support/sqlite-connection');
+const { createRunners }     = require('../../../support/test-helpers');
 
 describe('SQLiteQueryGenerator', () => {
   let connection;
@@ -14,6 +15,9 @@ describe('SQLiteQueryGenerator', () => {
   let Role;
   let UserThing;
   let RoleThing;
+
+  // eslint-disable-next-line no-unused-vars
+  const { it, fit } = createRunners(() => connection);
 
   beforeAll(() => {
     connection = new SQLiteConnection({
@@ -508,7 +512,7 @@ describe('SQLiteQueryGenerator', () => {
           .OR.MERGE(User.where.AND.firstName.EQ('Bob').OR.lastName.EQ('Brown')),
         );
 
-      let queryString     = queryGenerator.generateSelectStatement(query);
+      let queryString = queryGenerator.generateSelectStatement(query);
       expect(queryString).toEqual('SELECT "users"."firstName" AS "User:firstName","users"."id" AS "User:id","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."id" = \'test\' AND ("roles"."name" = \'admin\' OR "users"."firstName" = \'Bob\' OR "users"."lastName" = \'Brown\') ORDER BY "users"."rowid" ASC');
     });
 

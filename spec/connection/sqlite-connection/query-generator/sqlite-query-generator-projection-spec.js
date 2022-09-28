@@ -7,11 +7,15 @@
 
 const { Literals }          = require('mythix-orm');
 const { SQLiteConnection }  = require('../../../support/sqlite-connection');
+const { createRunners }     = require('../../../support/test-helpers');
 
 describe('SQLiteQueryGenerator', () => {
   let connection;
   let User;
   let Role;
+
+  // eslint-disable-next-line no-unused-vars
+  const { it, fit } = createRunners(() => connection);
 
   beforeAll(() => {
     connection = new SQLiteConnection({

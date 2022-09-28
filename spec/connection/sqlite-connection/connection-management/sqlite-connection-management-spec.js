@@ -2,16 +2,20 @@
 
 'use strict';
 
-/* global describe, it, expect, beforeAll */
+/* global describe, expect, beforeAll */
 
 const { Literals }          = require('mythix-orm');
 const { SQLiteConnection }  = require('../../../support/sqlite-connection');
+const { createRunners }     = require('../../../support/test-helpers');
 
 describe('SQLiteConnection', () => {
   describe('connection management', () => {
     let connection;
     let User;
     let Role;
+
+    // eslint-disable-next-line no-unused-vars
+    const { it, fit } = createRunners(() => connection);
 
     beforeAll(async () => {
       connection = new SQLiteConnection({

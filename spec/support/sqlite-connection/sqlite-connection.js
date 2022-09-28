@@ -165,7 +165,7 @@ class SQLiteConnection extends SQLConnectionBase {
     if (field.type.getDisplayName() !== 'BIGINT')
       return;
 
-    if (field.defaultValue !== DefaultHelpers.AUTO_INCREMENT)
+    if (!field.defaultValue._mythixIsAutoIncrement)
       return;
 
     return this.getEmulatedAutoIncrementID(field.Model, field);
@@ -176,6 +176,13 @@ class SQLiteConnection extends SQLConnectionBase {
       return;
 
     return await this.db.pragma(sql);
+  }
+
+  async enableForeignKeyConstraints(enable) {
+    if (enable)
+      return await this.pragma('foreign_keys = ON');
+    else
+      return await this.pragma('foreign_keys = OFF');
   }
 
   async exec(sql) {
@@ -205,9 +212,6 @@ class SQLiteConnection extends SQLConnectionBase {
 
       let result = await statement[methodName](...parameters);
 
-      // if (logger)
-      //   console.log('QUERY RESULT: ', result);
-
       if (methodName === 'all')
         return this.formatResultsResponse(sql, statement.columns(), result);
 
@@ -218,40 +222,48 @@ class SQLiteConnection extends SQLConnectionBase {
         logger.error(`QUERY: ${sql}`);
       }
 
+      error.query = sql;
+
       throw error;
     }
   }
 
   async transaction(callback, _options) {
     let options       = _options || {};
-    let inheritedThis = Object.create(options.connection || this);
+    let inheritedThis = Object.create(options.connection || this.getContextValue('connection', this));
+    let lockMode      = inheritedThis.getLockMode(options.lock);
     let savePointName;
+
+    if (lockMode && lockMode.lock)
+      lockMode = lockMode.mode || 'EXCLUSIVE';
+    else
+      lockMode = 'DEFERRED';
 
     if (inheritedThis.inTransaction !== true) {
       inheritedThis.inTransaction = true;
-      await this.query(`BEGIN${(options.mode) ? ` ${options.mode}` : ''}`);
+      await inheritedThis.query(`BEGIN ${lockMode} TRANSACTION`, options);
     } else {
-      savePointName = this.generateSavePointName();
+      savePointName = inheritedThis.generateSavePointName();
       inheritedThis.savePointName = savePointName;
       inheritedThis.isSavePoint = true;
 
-      await this.query(`SAVEPOINT ${savePointName}`);
+      await inheritedThis.query(`SAVEPOINT ${savePointName}`, options);
     }
 
     try {
-      let result = await callback.call(inheritedThis, inheritedThis);
+      let result = await inheritedThis.createContext(callback, inheritedThis, inheritedThis);
 
       if (savePointName)
-        await this.query(`RELEASE SAVEPOINT ${savePointName}`);
+        await inheritedThis.query(`RELEASE SAVEPOINT ${savePointName}`, options);
       else
-        await this.query('COMMIT');
+        await inheritedThis.query('COMMIT', options);
 
       return result;
     } catch (error) {
       if (savePointName)
-        await this.query(`ROLLBACK TO SAVEPOINT ${savePointName}`);
+        await inheritedThis.query(`ROLLBACK TO SAVEPOINT ${savePointName}`, options);
       else if (inheritedThis.inTransaction)
-        await this.query('ROLLBACK');
+        await inheritedThis.query('ROLLBACK', options);
 
       throw error;
     }
