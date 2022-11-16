@@ -154,6 +154,20 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryGenerator.generateSelectQueryCondition(queryPart, BigInt(1))).toEqual('"users"."id" = 1');
     });
 
+    it('can generate a query condition (EQ) using ANY', () => {
+      const queryPart = { Model: User, Field: User.fields.id, not: false, operator: 'EQ', inverseOperator: 'NEQ', subType: 'ANY' };
+
+      let queryGenerator = connection.getQueryGenerator();
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'))).toEqual('"users"."id" = ANY(SELECT "users"."id" AS "User:id" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
+    });
+
+    it('can generate a query condition (EQ) using ALL', () => {
+      const queryPart = { Model: User, Field: User.fields.id, not: false, operator: 'EQ', inverseOperator: 'NEQ', subType: 'ALL' };
+
+      let queryGenerator = connection.getQueryGenerator();
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'))).toEqual('"users"."id" = ALL(SELECT "users"."id" AS "User:id" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
+    });
+
     it('can generate a query condition for array of items (EQ)', () => {
       const queryPart = { Model: User, Field: User.fields.id, not: false, operator: 'EQ', inverseOperator: 'NEQ' };
 
@@ -445,6 +459,34 @@ describe('SQLiteQueryGenerator', () => {
     it('can generate where statements for query', () => {
       let queryGenerator = connection.getQueryGenerator();
       expect(queryGenerator.generateSelectWhereConditions(User.where.primaryRoleID.EQ(Role.where.id).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary'))).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
+    });
+
+    it('can generate where statements for query using ANY', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.primaryRoleID.EQ.ANY(Role.where.name.EQ('test')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
+
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ANY(SELECT "roles"."id" AS "Role:id" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
+    });
+
+    it('can generate where statements for query using ALL', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.primaryRoleID.EQ.ALL(Role.where.name.EQ('test')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
+
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ALL(SELECT "roles"."id" AS "Role:id" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
+    });
+
+    it('can generate where statements for query using EXISTS', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.firstName.EQ('Joe').OR.firstName.EQ('Mary').AND.EXISTS(Role.where.name.EQ('test'));
+
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND EXISTS(SELECT "roles"."id" AS "Role:id" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC)');
+    });
+
+    it('can generate where statements for query using EXISTS', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.firstName.EQ('Joe').OR.firstName.EQ('Mary').AND.NOT.EXISTS(Role.where.name.EQ('test'));
+
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND NOT EXISTS(SELECT "roles"."id" AS "Role:id" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC)');
     });
 
     it('can generate where statements for query, grouping conditions', () => {
