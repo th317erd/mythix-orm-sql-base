@@ -23,9 +23,9 @@ class ExtendedUser extends User {
       allowNull:    false,
     },
     'email': {
-      type:         Types.STRING(256),
-      allowNull:    false,
-      unique:       true,
+      type:      Types.STRING(256),
+      allowNull: false,
+      unique:    true,
     },
     'playerType': {
       type:         Types.STRING(256),
@@ -33,8 +33,8 @@ class ExtendedUser extends User {
       allowNull:    false,
     },
     'metadata': {
-      type:         Types.SERIALIZED(Types.STRING(256)),
-      allowNull:    true,
+      type:      Types.SERIALIZED(Types.STRING(256)),
+      allowNull: true,
     },
   });
 }

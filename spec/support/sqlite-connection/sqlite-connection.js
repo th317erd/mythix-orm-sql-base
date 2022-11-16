@@ -271,8 +271,8 @@ class SQLiteConnection extends SQLConnectionBase {
 
   formatResultsResponse(sqlStatement, columns, result) {
     return {
-      rows:     result,
-      columns:  columns.map((column) => column.name),
+      rows:    result,
+      columns: columns.map((column) => column.name),
     };
   }
 

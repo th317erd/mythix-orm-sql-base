@@ -84,9 +84,9 @@ describe('SQLiteConnection', () => {
       it('will update timestamps as expected', async () => {
         let userModels = [
           new models.ExtendedUser({
-            email:      'test@example.com',
-            firstName:  'Mary',
-            lastName:   'Anne',
+            email:     'test@example.com',
+            firstName: 'Mary',
+            lastName:  'Anne',
           }),
         ];
 
@@ -147,12 +147,12 @@ describe('SQLiteConnection', () => {
       it('can serialize toJSON', async () => {
         let userModels = [
           new models.ExtendedUser({
-            email:      'test@example.com',
-            firstName:  'Mary',
-            lastName:   'Anne',
-            createdAt:  '07.30.2022 22:39:01',
-            updatedAt:  '07.30.2022 22:39:01',
-            metadata:   { test: true, hello: 'world' },
+            email:     'test@example.com',
+            firstName: 'Mary',
+            lastName:  'Anne',
+            createdAt: '07.30.2022 22:39:01',
+            updatedAt: '07.30.2022 22:39:01',
+            metadata:  { test: true, hello: 'world' },
           }),
         ];
 
@@ -176,9 +176,9 @@ describe('SQLiteConnection', () => {
 
         user = await models.ExtendedUser.where.first();
         expect(user.metadata).toEqual({
-          cool:   'beans',
-          test:   true,
-          hello:  'world',
+          cool:  'beans',
+          test:  true,
+          hello: 'world',
         });
       });
     });
@@ -187,9 +187,9 @@ describe('SQLiteConnection', () => {
       it('can reload a model in-place', async () => {
         let userModels = [
           new models.ExtendedUser({
-            email:      'test@example.com',
-            firstName:  'Mary',
-            lastName:   'Anne',
+            email:     'test@example.com',
+            firstName: 'Mary',
+            lastName:  'Anne',
           }),
         ];
 
@@ -214,14 +214,14 @@ describe('SQLiteConnection', () => {
       it('can update model fields before create', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     'not a number',
-            boolean:    'bad',
-            date:       '20-01-01',
+            number:  'not a number',
+            boolean: 'bad',
+            date:    '20-01-01',
           }),
           new models.ValidationTest({
-            number:     'not a number',
-            boolean:    'bad',
-            date:       '20-01-01',
+            number:  'not a number',
+            boolean: 'bad',
+            date:    '20-01-01',
           }),
         ];
 
@@ -246,16 +246,16 @@ describe('SQLiteConnection', () => {
         expect(validationModels).toBeInstanceOf(Array);
         expect(validationModels.length).toEqual(2);
         expect(Object.assign(validationModels[0].toJSON(), { id: null })).toEqual({
-          id:       null,
-          number:   '123',
-          boolean:  'false',
-          date:     '2001-01-01',
+          id:      null,
+          number:  '123',
+          boolean: 'false',
+          date:    '2001-01-01',
         });
         expect(Object.assign(validationModels[1].toJSON(), { id: null })).toEqual({
-          id:       null,
-          number:   '123',
-          boolean:  'false',
-          date:     '2001-01-01',
+          id:      null,
+          number:  '123',
+          boolean: 'false',
+          date:    '2001-01-01',
         });
       });
     });
@@ -264,14 +264,14 @@ describe('SQLiteConnection', () => {
       it('can update model fields before update', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     123,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  123,
+            boolean: true,
+            date:    '2000-01-01',
           }),
           new models.ValidationTest({
-            number:     456,
-            boolean:    false,
-            date:       '2000-01-01',
+            number:  456,
+            boolean: false,
+            date:    '2000-01-01',
           }),
         ];
 
@@ -315,16 +315,16 @@ describe('SQLiteConnection', () => {
         expect(validationModels).toBeInstanceOf(Array);
         expect(validationModels.length).toEqual(2);
         expect(Object.assign(validationModels[0].toJSON(), { id: null })).toEqual({
-          id:       null,
-          number:   '1231',
-          boolean:  'false',
-          date:     '2001-01-05',
+          id:      null,
+          number:  '1231',
+          boolean: 'false',
+          date:    '2001-01-05',
         });
         expect(Object.assign(validationModels[1].toJSON(), { id: null })).toEqual({
-          id:       null,
-          number:   '4561',
-          boolean:  'true',
-          date:     '2001-01-05',
+          id:      null,
+          number:  '4561',
+          boolean: 'true',
+          date:    '2001-01-05',
         });
       });
     });
@@ -333,14 +333,14 @@ describe('SQLiteConnection', () => {
       it('can validate model fields', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     123,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  123,
+            boolean: true,
+            date:    '2000-01-01',
           }),
           new models.ValidationTest({
-            number:     456,
-            boolean:    true,
-            date:       '2022-07-31',
+            number:  456,
+            boolean: true,
+            date:    '2022-07-31',
           }),
         ];
 
@@ -356,14 +356,14 @@ describe('SQLiteConnection', () => {
       it('can should fail validations properly #1', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     123,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  123,
+            boolean: true,
+            date:    '2000-01-01',
           }),
           new models.ValidationTest({
-            number:     'derp',
-            boolean:    true,
-            date:       '2022-07-31',
+            number:  'derp',
+            boolean: true,
+            date:    '2022-07-31',
           }),
         ];
 
@@ -380,14 +380,14 @@ describe('SQLiteConnection', () => {
       it('can should fail validations properly #2', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     123,
-            boolean:    'hello',
-            date:       '2000-01-01',
+            number:  123,
+            boolean: 'hello',
+            date:    '2000-01-01',
           }),
           new models.ValidationTest({
-            number:     'derp',
-            boolean:    true,
-            date:       '2022-07-31',
+            number:  'derp',
+            boolean: true,
+            date:    '2022-07-31',
           }),
         ];
 
@@ -404,14 +404,14 @@ describe('SQLiteConnection', () => {
       it('can should fail validations properly #3', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     123,
-            boolean:    'true',
-            date:       '20-01-01',
+            number:  123,
+            boolean: 'true',
+            date:    '20-01-01',
           }),
           new models.ValidationTest({
-            number:     1,
-            boolean:    true,
-            date:       '2022-07-31',
+            number:  1,
+            boolean: true,
+            date:    '2022-07-31',
           }),
         ];
 
@@ -428,9 +428,9 @@ describe('SQLiteConnection', () => {
       it('can should skip validations if onBeforeSave is overloaded', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     'not a number',
-            boolean:    'nope',
-            date:       '20-01-01',
+            number:  'not a number',
+            boolean: 'nope',
+            date:    '20-01-01',
           }),
         ];
 
@@ -448,9 +448,9 @@ describe('SQLiteConnection', () => {
       it('can have model changes available in onAfterCreate hook', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     55,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  55,
+            boolean: true,
+            date:    '2000-01-01',
           }),
         ];
 
@@ -462,19 +462,19 @@ describe('SQLiteConnection', () => {
 
         await connection.insert(models.ValidationTest, validationModels);
         expect(afterChanges).toEqual({
-          id:       { previous: undefined, current: validationModels[0].id },
-          boolean:  { previous: undefined, current: 'true' },
-          date:     { previous: undefined, current: '2000-01-01' },
-          number:   { previous: undefined, current: '55' },
+          id:      { previous: undefined, current: validationModels[0].id },
+          boolean: { previous: undefined, current: 'true' },
+          date:    { previous: undefined, current: '2000-01-01' },
+          number:  { previous: undefined, current: '55' },
         });
       });
 
       it('can have model changes available in onAfterSave hook', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     55,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  55,
+            boolean: true,
+            date:    '2000-01-01',
           }),
         ];
 
@@ -486,10 +486,10 @@ describe('SQLiteConnection', () => {
 
         await connection.insert(models.ValidationTest, validationModels);
         expect(afterChanges).toEqual({
-          id:       { previous: undefined, current: validationModels[0].id },
-          boolean:  { previous: undefined, current: 'true' },
-          date:     { previous: undefined, current: '2000-01-01' },
-          number:   { previous: undefined, current: '55' },
+          id:      { previous: undefined, current: validationModels[0].id },
+          boolean: { previous: undefined, current: 'true' },
+          date:    { previous: undefined, current: '2000-01-01' },
+          number:  { previous: undefined, current: '55' },
         });
 
         afterChanges = undefined;
@@ -500,18 +500,18 @@ describe('SQLiteConnection', () => {
 
         await validationModels[0].save();
         expect(afterChanges).toEqual({
-          boolean:  { previous: 'true', current: 'false' },
-          date:     { previous: '2000-01-01', current: '2001-01-01' },
-          number:   { previous: '55', current: '42' },
+          boolean: { previous: 'true', current: 'false' },
+          date:    { previous: '2000-01-01', current: '2001-01-01' },
+          number:  { previous: '55', current: '42' },
         });
       });
 
       it('can have model changes available in onAfterUpdate hook', async () => {
         let validationModels = [
           new models.ValidationTest({
-            number:     55,
-            boolean:    true,
-            date:       '2000-01-01',
+            number:  55,
+            boolean: true,
+            date:    '2000-01-01',
           }),
         ];
 
@@ -530,9 +530,9 @@ describe('SQLiteConnection', () => {
 
         await validationModels[0].save();
         expect(afterChanges).toEqual({
-          boolean:  { previous: 'true', current: 'false' },
-          date:     { previous: '2000-01-01', current: '2001-01-01' },
-          number:   { previous: '55', current: '42' },
+          boolean: { previous: 'true', current: 'false' },
+          date:    { previous: '2000-01-01', current: '2001-01-01' },
+          number:  { previous: '55', current: '42' },
         });
       });
     });
