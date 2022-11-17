@@ -482,7 +482,7 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND EXISTS(SELECT "roles"."id" AS "Role:id" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC)');
     });
 
-    it('can generate where statements for query using EXISTS', () => {
+    it('can generate where statements for query using NOT EXISTS', () => {
       let queryGenerator = connection.getQueryGenerator();
       let query = User.where.firstName.EQ('Joe').OR.firstName.EQ('Mary').AND.NOT.EXISTS(Role.where.name.EQ('test'));
 
