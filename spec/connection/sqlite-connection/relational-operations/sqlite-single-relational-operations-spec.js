@@ -54,7 +54,7 @@ describe('SQLiteConnection', () => {
           primaryRoleID: '5016a9dc-0271-41a0-937a-a0c95acd117b',
         });
 
-        expect((await user.queryForUserThingRole()).toString()).toEqual('SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name" FROM "roles" INNER JOIN "role_things" ON "role_things"."roleID" = "roles"."id" INNER JOIN "user_things" ON "user_things"."roleThingID" = "role_things"."id" WHERE "user_things"."userID" = \'664e9071-11d9-4544-85fe-1359ce1904b1\' ORDER BY "roles"."rowid" ASC');
+        expect((await user.queryForUserThingRole()).toString()).toEqual('SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name","roles"."rowid" AS "Role:rowid" FROM "roles" INNER JOIN "role_things" ON "role_things"."roleID" = "roles"."id" INNER JOIN "user_things" ON "user_things"."roleThingID" = "role_things"."id" WHERE "user_things"."userID" = \'664e9071-11d9-4544-85fe-1359ce1904b1\' ORDER BY "roles"."rowid" ASC');
       });
 
       it('can create a single model through a relational field', async () => {

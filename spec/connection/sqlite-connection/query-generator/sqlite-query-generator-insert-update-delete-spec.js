@@ -335,7 +335,7 @@ describe('SQLiteQueryGenerator', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.id.EQ('test'));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."id" = \'test\'');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."id" = \'test\' ORDER BY "users"."rowid" ASC LIMIT 4294967295 OFFSET 0');
     });
 
     it('should generate a delete statement and ignore an order, limit, or offset if there are no conditions in the query', () => {
