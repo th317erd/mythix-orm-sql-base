@@ -70,6 +70,48 @@ describe('SQLiteQueryGenerator', () => {
     });
   });
 
+  describe('generateGroupByClause', () => {
+    const generateFieldKey = (field) => {
+      return `${field.Model.getModelName()}:${field.fieldName}`;
+    };
+
+    it('can generate proper group by clause', () => {
+      let queryGenerator = connection.getQueryGenerator();
+
+      let order = new Map();
+      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
+
+      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id"');
+    });
+
+    it('can generate proper group by clause with a string literal', () => {
+      let queryGenerator = connection.getQueryGenerator();
+
+      let order = new Map();
+      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
+      order.set('test', { value: 'test' });
+
+      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id",test');
+    });
+
+    it('can generate proper group by clause with multiple fields', () => {
+      let queryGenerator = connection.getQueryGenerator();
+
+      let order = new Map();
+      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
+      order.set(generateFieldKey(User.fields.firstName), { value: User.fields.firstName });
+
+      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id","users"."firstName"');
+    });
+
+    it('should return an empty string if nothing was provided', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      expect(queryGenerator.generateGroupByClause()).toEqual('');
+      expect(queryGenerator.generateGroupByClause([])).toEqual('');
+      expect(queryGenerator.generateGroupByClause([ null, false, '' ])).toEqual('');
+    });
+  });
+
   describe('getOrderLimitOffset', () => {
     it('can get order, limit, and offset from query', () => {
       let queryGenerator = connection.getQueryGenerator();

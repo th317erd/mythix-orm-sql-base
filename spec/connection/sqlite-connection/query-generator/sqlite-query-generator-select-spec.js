@@ -571,6 +571,20 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryString).toEqual('SELECT "users"."id" AS "User:id","users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID" FROM "users" WHERE "users"."primaryRoleID" = 1 ORDER BY "users"."id" ASC LIMIT 100 OFFSET 500');
     });
 
+    it('can generate a select statement with an group by and having clause', () => {
+      let queryGenerator  = connection.getQueryGenerator();
+      let queryString     = queryGenerator.generateSelectStatement(
+        User.where
+          .primaryRoleID
+            .EQ(1)
+          .GROUP_BY('firstName')
+          .HAVING(User.where.lastName.EQ('Smith'))
+          .LIMIT(100)
+          .OFFSET(500),
+      );
+      expect(queryString).toEqual('SELECT "users"."id" AS "User:id","users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID","users"."rowid" AS "User:rowid" FROM "users" WHERE "users"."primaryRoleID" = 1 GROUP BY "users"."firstName" HAVING ("users"."lastName" = \'Smith\') ORDER BY "users"."rowid" ASC LIMIT 100 OFFSET 500');
+    });
+
     it('can generate a select statement with a DISTINCT clause', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let queryString     = queryGenerator.generateSelectStatement(
@@ -613,7 +627,7 @@ describe('SQLiteQueryGenerator', () => {
         'User:firstName',
         'User:lastName',
         'User:primaryRoleID',
-        'User:rowid',
+        '"users"."rowid" AS "User:rowid"',
       ]);
 
       expect(Array.from(result.projectionFields.values())).toEqual([

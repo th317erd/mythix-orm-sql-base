@@ -12,6 +12,7 @@ const {
 } = require('../sqlite-connection-helper');
 
 const { createRunners } = require('../../../support/test-helpers');
+const { CountLiteral } = require('mythix-orm/lib/connection/literals');
 
 describe('SQLiteConnection', () => {
   describe('database operations', () => {
@@ -186,6 +187,24 @@ describe('SQLiteConnection', () => {
           expect(user).toBeInstanceOf(User);
           expect(user.firstName).toEqual(testValue);
         }
+      });
+
+      it('should be able to group results using group by', async () => {
+        let insertModels = [
+          new User({ firstName: 'John', lastName: 'Smith', primaryRole: new Role({ name: 'admin' }) }),
+          new User({ firstName: 'Bob', lastName: 'Smith', primaryRole: new Role({ name: 'admin' }) }),
+          new User({ firstName: 'Mary', lastName: 'Anne', primaryRole: new Role({ name: 'member' }) }),
+        ];
+
+        await connection.insert(User, insertModels);
+
+        let result = await Utils.collect(connection.select(User.where.GROUP_BY('lastName').PROJECT('User:lastName', new CountLiteral('User:lastName', { alias: 'count' }))));
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(2);
+        expect(result[0]['User:lastName']).toEqual('Smith');
+        expect(result[0]['count']).toEqual(2);
+        expect(result[1]['User:lastName']).toEqual('Anne');
+        expect(result[1]['count']).toEqual(1);
       });
     });
 
