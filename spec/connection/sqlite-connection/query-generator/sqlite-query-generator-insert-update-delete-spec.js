@@ -335,7 +335,7 @@ describe('SQLiteQueryGenerator', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.id.EQ('test'));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."id" = \'test\' ORDER BY "users"."rowid" ASC LIMIT 4294967295 OFFSET 0');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."id" = \'test\' RETURNING "users"."id" ORDER BY "users"."rowid" ASC LIMIT 4294967295 OFFSET 0');
     });
 
     it('should generate a delete statement and ignore an order, limit, or offset if there are no conditions in the query', () => {
@@ -349,28 +349,28 @@ describe('SQLiteQueryGenerator', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.LIKE('%bob%').ORDER('id').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' ORDER BY "users"."id" ASC LIMIT 50 OFFSET 10');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' RETURNING "users"."id" ORDER BY "users"."id" ASC LIMIT 50 OFFSET 10');
     });
 
     it('should generate a delete statement and force a limit if an order is specified', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.LIKE('%bob%').ORDER('firstName'));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' ORDER BY "users"."firstName" ASC LIMIT 4294967295 OFFSET 0');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' RETURNING "users"."id" ORDER BY "users"."firstName" ASC LIMIT 4294967295 OFFSET 0');
     });
 
     it('should generate a delete statement with a table join', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.primaryRoleID.EQ(Role.where.id).firstName.LIKE('%bob%').ORDER('User:firstName').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1,"users"."firstName" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' AND "users"."id" = "_users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10)');
+      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1,"users"."firstName" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' AND "users"."id" = "_users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10) RETURNING "users"."id"');
     });
 
     it('should generate a delete statement with a where clause, and an order, limit, and offset', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.firstName.EQ('Bob').ORDER('firstName').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" = \'Bob\' ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10');
+      expect(result).toEqual('DELETE FROM "users" WHERE "users"."firstName" = \'Bob\' RETURNING "users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10');
     });
   });
 });
