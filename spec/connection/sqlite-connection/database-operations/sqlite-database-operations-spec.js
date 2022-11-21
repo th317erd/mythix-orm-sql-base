@@ -198,7 +198,7 @@ describe('SQLiteConnection', () => {
 
         await connection.insert(User, insertModels);
 
-        let result = await Utils.collect(connection.select(User.where.GROUP_BY('lastName').PROJECT('User:lastName', new CountLiteral('User:lastName', { alias: 'count' }))));
+        let result = await Utils.collect(connection.select(User.where.GROUP_BY('lastName').PROJECT('User:lastName', new CountLiteral('User:lastName', { as: 'count' }))));
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toEqual(2);
         expect(result[0]['User:lastName']).toEqual('Smith');
