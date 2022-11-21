@@ -158,6 +158,7 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
     options?: GenericObject,
   ): string;
 
+  public generateDeleteStatementReturningClause(Model: ModelClass, queryEngine: QueryEngine, pkField: Field | null, escapedColumnName: string | null, options: GenericObject): string;
   public generateDeleteStatement(Model: ModelClass, queryEngine: QueryEngine, options?: GenericObject): string;
   public generateTruncateTableStatement(Model: ModelClass, options?: GenericObject): string;
   public generateAlterTableStatement(Model: ModelClass, newModelAttributes, options?: GenericObject): string;

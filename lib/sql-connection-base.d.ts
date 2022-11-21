@@ -2,7 +2,7 @@ import { ConnectionBase, Field, ModelClass, QueryEngine, QueryResults, Model } f
 import { GenericObject } from 'mythix-orm/lib/interfaces/common';
 
 export declare interface ModelDataFromQueryResults {
-  [ key: string ]: Array<GenericObject>;
+  [key: string]: Array<GenericObject>;
 }
 
 declare class SQLConnectionBase extends ConnectionBase {
@@ -20,17 +20,19 @@ declare class SQLConnectionBase extends ConnectionBase {
 
   public enableForeignKeyConstraints(enable: boolean): Promise<void>;
 
-  buildModelsFromModelDataMap(
+  public buildModelsFromModelDataMap(
     queryEngine: QueryEngine,
     modelDataMap: ModelDataFromQueryResults,
     callback: (Model: ModelClass, model: Model) => Model,
   ): Array<Model>;
 
-  updateModelsFromResults(
+  public updateModelsFromResults(
     Model: ModelClass,
     storedModels: Array<Model>,
     results: QueryResults
   ): Array<Model>;
+
+  public getUpdateOrDeleteChangeCount(queryResult: any): number;
 }
 
 export default SQLConnectionBase;
