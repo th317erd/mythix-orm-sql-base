@@ -36,6 +36,20 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."id" DESC');
     });
 
+    it('can generate proper order clause using ADD', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.ORDER.ADD('+id', '-firstName');
+
+      expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."id" ASC,"users"."firstName" DESC');
+    });
+
+    it('can generate proper order clause using REPLACE', () => {
+      let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.ORDER.ADD('+id', '-firstName').ORDER.REPLACE('+lastName');
+
+      expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."lastName" ASC');
+    });
+
     it('can generate proper order clause with a string literal', () => {
       let queryGenerator = connection.getQueryGenerator();
       let query = User.where.ORDER.DESC('+id').ORDER.ASC('+@test');
