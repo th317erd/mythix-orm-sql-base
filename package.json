@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/th317erd/mythix-orm-sql-base#readme",
   "peerDependencies": {
-    "mythix-orm": "^1.11.1"
+    "mythix-orm": "^1.11.3"
   },
   "dependencies": {
     "luxon": "^3.1.0",
@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@spothero/eslint-plugin-spothero": "github:spothero/eslint-plugin-spothero",
-    "better-sqlite3": "^7.6.2",
-    "eslint": "^8.27.0",
+    "better-sqlite3": "^8.0.0",
+    "eslint": "^8.28.0",
     "jasmine": "^4.5.0",
     "nyc": "^15.1.0"
   },
