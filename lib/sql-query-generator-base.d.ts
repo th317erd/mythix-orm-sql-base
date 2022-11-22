@@ -70,10 +70,8 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
   public sortJoinRelationOrder(joins: Map<string, Array<JoinTableInfo>>): Array<string>;
   public generateSelectQueryJoinTables(queryEngine: QueryEngine, options?: GenericObject): string;
   public generateSelectWhereConditions(queryEngine: QueryEngine, options?: GenericObject): string;
-  public generateOrderClause(
-    orders: LiteralBase | FieldOrderInfo | Array<LiteralBase | FieldOrderInfo>,
-    options?: GenericObject
-  ): string;
+  public generateOrderClause(queryEngine: QueryEngine, options?: GenericObject): string;
+  public generateGroupByClause(queryEngine: QueryEngine, options?: GenericObject): string;
 
   public generateLimitClause(limit: LiteralBase | number | string, options?: GenericObject): string;
   public generateOffsetClause(offset: LiteralBase | number | string, options?: GenericObject): string;

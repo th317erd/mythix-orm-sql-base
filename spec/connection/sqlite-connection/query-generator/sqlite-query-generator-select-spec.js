@@ -158,14 +158,14 @@ describe('SQLiteQueryGenerator', () => {
       const queryPart = { Model: User, Field: User.fields.id, not: false, operator: 'EQ', inverseOperator: 'NEQ', subType: 'ANY' };
 
       let queryGenerator = connection.getQueryGenerator();
-      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'))).toEqual('"users"."id" = ANY(SELECT "users"."id" AS "User:id","users"."rowid" AS "User:rowid" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'))).toEqual('"users"."id" = ANY(SELECT "users"."id" AS "User:id" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
     });
 
     it('can generate a query condition (EQ) using ALL', () => {
       const queryPart = { Model: User, Field: User.fields.id, not: false, operator: 'EQ', inverseOperator: 'NEQ', subType: 'ALL' };
 
       let queryGenerator = connection.getQueryGenerator();
-      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'))).toEqual('"users"."id" = ALL(SELECT "users"."id" AS "User:id","users"."rowid" AS "User:rowid" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
+      expect(queryGenerator.generateSelectQueryCondition(queryPart, User.where.id.EQ('test').OR.firstName.EQ('Bob').PROJECT('id'), { isSubQuery: true })).toEqual('"users"."id" = ALL(SELECT "users"."id" AS "User:id" FROM "users" WHERE "users"."id" = \'test\' OR "users"."firstName" = \'Bob\' ORDER BY "users"."rowid" ASC)');
     });
 
     it('can generate a query condition for array of items (EQ)', () => {
@@ -463,30 +463,30 @@ describe('SQLiteQueryGenerator', () => {
 
     it('can generate where statements for query using ANY', () => {
       let queryGenerator = connection.getQueryGenerator();
-      let query = User.where.primaryRoleID.EQ.ANY(Role.where.name.EQ('test')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
+      let query = User.where.primaryRoleID.EQ.ANY(Role.where.name.EQ('test').PROJECT('name')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
 
-      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ANY(SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name","roles"."rowid" AS "Role:rowid" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ANY(SELECT "roles"."name" AS "Role:name" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
     });
 
     it('can generate where statements for query using ALL', () => {
       let queryGenerator = connection.getQueryGenerator();
-      let query = User.where.primaryRoleID.EQ.ALL(Role.where.name.EQ('test')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
+      let query = User.where.primaryRoleID.EQ.ALL(Role.where.name.EQ('test').PROJECT('name')).AND.firstName.EQ('Joe').OR.firstName.EQ('Mary');
 
-      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ALL(SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name","roles"."rowid" AS "Role:rowid" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."primaryRoleID" = ALL(SELECT "roles"."name" AS "Role:name" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC) AND "users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\'');
     });
 
     it('can generate where statements for query using EXISTS', () => {
       let queryGenerator = connection.getQueryGenerator();
       let query = User.where.firstName.EQ('Joe').OR.firstName.EQ('Mary').AND.EXISTS(Role.where.name.EQ('test'));
 
-      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND EXISTS(SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name","roles"."rowid" AS "Role:rowid" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC)');
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND EXISTS(SELECT 1 FROM "roles" WHERE "roles"."name" = \'test\' LIMIT 1 OFFSET 0)');
     });
 
     it('can generate where statements for query using NOT EXISTS', () => {
       let queryGenerator = connection.getQueryGenerator();
       let query = User.where.firstName.EQ('Joe').OR.firstName.EQ('Mary').AND.NOT.EXISTS(Role.where.name.EQ('test'));
 
-      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND NOT EXISTS(SELECT "roles"."id" AS "Role:id","roles"."name" AS "Role:name","roles"."rowid" AS "Role:rowid" FROM "roles" WHERE "roles"."name" = \'test\' ORDER BY "roles"."rowid" ASC)');
+      expect(queryGenerator.generateSelectWhereConditions(query)).toEqual('"users"."firstName" = \'Joe\' OR "users"."firstName" = \'Mary\' AND NOT EXISTS(SELECT 1 FROM "roles" WHERE "roles"."name" = \'test\' LIMIT 1 OFFSET 0)');
     });
 
     it('can generate where statements for query, grouping conditions', () => {
@@ -555,7 +555,7 @@ describe('SQLiteQueryGenerator', () => {
         );
 
       let queryString = queryGenerator.generateSelectStatement(query);
-      expect(queryString).toEqual('SELECT "users"."id" AS "User:id","users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID","users"."rowid" AS "User:rowid" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."id" = \'test\' AND ("roles"."name" = \'admin\' AND "users"."firstName" = \'Bob\' OR "users"."lastName" = \'Brown\') ORDER BY "users"."rowid" ASC');
+      expect(queryString).toEqual('SELECT "users"."id" AS "User:id","users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID","users"."rowid" AS "User:rowid" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."id" = \'test\' AND ("roles"."name" = \'admin\' OR "users"."firstName" = \'Bob\' OR "users"."lastName" = \'Brown\') ORDER BY "users"."rowid" ASC');
     });
 
     it('can generate a select statement with an order, limit, and offset', () => {
@@ -595,7 +595,7 @@ describe('SQLiteQueryGenerator', () => {
           .LIMIT(100)
           .OFFSET(500),
       );
-      expect(queryString).toEqual('SELECT "users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID","users"."rowid" AS "User:rowid" FROM "users" WHERE "users"."primaryRoleID" = 1 ORDER BY "users"."rowid" ASC LIMIT 100 OFFSET 500');
+      expect(queryString).toEqual('SELECT DISTINCT ON("users"."id") "users"."id" AS "User:id","users"."firstName" AS "User:firstName","users"."lastName" AS "User:lastName","users"."primaryRoleID" AS "User:primaryRoleID","users"."rowid" AS "User:rowid" FROM "users" WHERE "users"."primaryRoleID" = 1 ORDER BY "users"."rowid" ASC LIMIT 100 OFFSET 500');
     });
 
     it('can generate a select statement using literals', () => {

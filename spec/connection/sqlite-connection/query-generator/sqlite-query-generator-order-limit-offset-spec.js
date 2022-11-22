@@ -29,37 +29,25 @@ describe('SQLiteQueryGenerator', () => {
   });
 
   describe('generateOrderClause', () => {
-    const generateFieldKey = (field) => {
-      return `${field.Model.getModelName()}:${field.fieldName}`;
-    };
-
     it('can generate proper order clause', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.ORDER.DESC('+id');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { direction: '-', value: User.fields.id });
-
-      expect(queryGenerator.generateOrderClause(order)).toEqual('ORDER BY "users"."id" DESC');
+      expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."id" DESC');
     });
 
     it('can generate proper order clause with a string literal', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.ORDER.DESC('+id').ORDER.ASC('+@test');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { direction: '-', value: User.fields.id });
-      order.set('test', { direction: '+', value: 'test' });
-
-      expect(queryGenerator.generateOrderClause(order)).toEqual('ORDER BY "users"."id" DESC,test ASC');
+      expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."id" DESC,test ASC');
     });
 
     it('can generate proper order clause with multiple orders', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.ORDER.DESC('+id').ORDER.ASC('+firstName');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { direction: '-', value: User.fields.id });
-      order.set(generateFieldKey(User.fields.firstName), { direction: '+', value: User.fields.firstName });
-
-      expect(queryGenerator.generateOrderClause(order)).toEqual('ORDER BY "users"."id" DESC,"users"."firstName" ASC');
+      expect(queryGenerator.generateOrderClause(query)).toEqual('ORDER BY "users"."id" DESC,"users"."firstName" ASC');
     });
 
     it('should return an empty string if nothing was provided', () => {
@@ -71,37 +59,25 @@ describe('SQLiteQueryGenerator', () => {
   });
 
   describe('generateGroupByClause', () => {
-    const generateFieldKey = (field) => {
-      return `${field.Model.getModelName()}:${field.fieldName}`;
-    };
-
     it('can generate proper group by clause', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.GROUP_BY('+id');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
-
-      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id"');
+      expect(queryGenerator.generateGroupByClause(query)).toEqual('GROUP BY "users"."id"');
     });
 
     it('can generate proper group by clause with a string literal', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.GROUP_BY('id', '+@test');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
-      order.set('test', { value: 'test' });
-
-      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id",test');
+      expect(queryGenerator.generateGroupByClause(query)).toEqual('GROUP BY "users"."id",test');
     });
 
     it('can generate proper group by clause with multiple fields', () => {
       let queryGenerator = connection.getQueryGenerator();
+      let query = User.where.GROUP_BY('id', 'firstName');
 
-      let order = new Map();
-      order.set(generateFieldKey(User.fields.id), { value: User.fields.id });
-      order.set(generateFieldKey(User.fields.firstName), { value: User.fields.firstName });
-
-      expect(queryGenerator.generateGroupByClause(order)).toEqual('GROUP BY "users"."id","users"."firstName"');
+      expect(queryGenerator.generateGroupByClause(query)).toEqual('GROUP BY "users"."id","users"."firstName"');
     });
 
     it('should return an empty string if nothing was provided', () => {
@@ -109,116 +85,6 @@ describe('SQLiteQueryGenerator', () => {
       expect(queryGenerator.generateGroupByClause()).toEqual('');
       expect(queryGenerator.generateGroupByClause([])).toEqual('');
       expect(queryGenerator.generateGroupByClause([ null, false, '' ])).toEqual('');
-    });
-  });
-
-  describe('getOrderLimitOffset', () => {
-    it('can get order, limit, and offset from query', () => {
-      let queryGenerator = connection.getQueryGenerator();
-      let result = queryGenerator.getOrderLimitOffset(User.where.primaryRoleID.EQ(1).LIMIT(100).OFFSET(5).ORDER('+id'));
-
-      expect({
-        limit:  result.limit,
-        offset: result.offset,
-        order:  Array.from(result.order.values()),
-      }).toEqual({
-        limit:  100,
-        offset: 5,
-        order:  [
-          {
-            value:     User.fields.id,
-            direction: '+',
-          },
-        ],
-      });
-    });
-
-    it('will allow limit to be infinity', () => {
-      let queryGenerator = connection.getQueryGenerator();
-      let result = queryGenerator.getOrderLimitOffset(User.where.primaryRoleID.EQ(1).LIMIT(Infinity).OFFSET(5).ORDER('+id'));
-
-      expect({
-        limit:  result.limit,
-        offset: result.offset,
-        order:  Array.from(result.order.values()),
-      }).toEqual({
-        limit:  Infinity,
-        offset: 5,
-        order:  [
-          {
-            value:     User.fields.id,
-            direction: '+',
-          },
-        ],
-      });
-    });
-
-    it('can order should be able to take mixed args', () => {
-      let queryGenerator = connection.getQueryGenerator();
-      let result = queryGenerator.getOrderLimitOffset(User.where.primaryRoleID.EQ(1).ORDER('+id', [ 'firstName' ], 'primaryRoleID').ORDER.DESC('+lastName'));
-
-      expect({
-        limit:  result.limit,
-        offset: result.offset,
-        order:  Array.from(result.order.values()),
-      }).toEqual({
-        limit:  undefined,
-        offset: undefined,
-        order:  [
-          {
-            value:     User.fields.id,
-            direction: '+',
-          },
-          {
-            value:     User.fields.firstName,
-            direction: '+',
-          },
-          {
-            value:     User.fields.primaryRoleID,
-            direction: '+',
-          },
-          {
-            value:     User.fields.lastName,
-            direction: '-',
-          },
-        ],
-      });
-    });
-
-    it('can overwrite order, limit, and offset from query', () => {
-      let queryGenerator = connection.getQueryGenerator();
-      let result = queryGenerator.getOrderLimitOffset(User.where.primaryRoleID.EQ(1).LIMIT(100).OFFSET(5).ORDER('+id').LIMIT(200).OFFSET(50).ORDER([ '+id' ]).ORDER.DESC('+firstName'));
-
-      expect({
-        limit:  result.limit,
-        offset: result.offset,
-        order:  Array.from(result.order.values()),
-      }).toEqual({
-        limit:  200,
-        offset: 50,
-        order:  [
-          {
-            value:     User.fields.id,
-            direction: '+',
-          },
-          {
-            value:     User.fields.firstName,
-            direction: '-',
-          },
-        ],
-      });
-    });
-
-    it('will throw error if it can not find the field', () => {
-      let queryGenerator = connection.getQueryGenerator();
-      expect(() => queryGenerator.getOrderLimitOffset(
-        User.where
-          .primaryRoleID
-            .EQ(Role.where.id)
-          .LIMIT(100)
-          .OFFSET(5)
-          .ORDER([ 'User:derp' ]),
-      )).toThrow(new Error('QueryUtils::margeFields: Field "derp" not found.'));
     });
   });
 

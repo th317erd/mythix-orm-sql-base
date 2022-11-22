@@ -363,7 +363,7 @@ describe('SQLiteQueryGenerator', () => {
       let queryGenerator  = connection.getQueryGenerator();
       let result          = queryGenerator.generateDeleteStatement(User, User.where.primaryRoleID.EQ(Role.where.id).firstName.LIKE('%bob%').ORDER('User:firstName').LIMIT(50).OFFSET(10));
 
-      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1,"users"."firstName" FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' AND "users"."id" = "_users"."id" ORDER BY "users"."firstName" ASC LIMIT 50 OFFSET 10) RETURNING "users"."id"');
+      expect(result).toEqual('DELETE FROM "users" AS "_users" WHERE EXISTS (SELECT 1 FROM "users" INNER JOIN "roles" ON "roles"."id" = "users"."primaryRoleID" WHERE "users"."firstName" LIKE \'%bob%\' ESCAPE \'\\\' AND "users"."id" = "_users"."id" LIMIT 1 OFFSET 0) RETURNING "users"."id"');
     });
 
     it('should generate a delete statement with a where clause, and an order, limit, and offset', () => {
