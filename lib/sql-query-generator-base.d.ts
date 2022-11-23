@@ -1,4 +1,4 @@
-import { Field, FieldOrderInfo, JoinTableInfo, Model, ModelClass, PreparedModels, QueryEngine, QueryGeneratorBase } from 'mythix-orm';
+import { Field, Model, ModelClass, PreparedModels, QueryEngine, QueryGeneratorBase } from 'mythix-orm';
 import { LiteralBase } from 'mythix-orm/lib/connection/literals';
 import { GenericObject } from 'mythix-orm/lib/interfaces/common';
 import { Type } from 'mythix-orm/lib/types';
@@ -11,7 +11,61 @@ export declare interface QueryConditionContext {
   value: any;
 }
 
+export declare interface GetEscapedFieldNameOptions {
+  fieldNameOnly?: boolean;
+}
+
+export declare interface GetEscapedTableNameNameOptions {
+  tableNamePrefix?: string;
+}
+
+export declare interface GetEscapedColumnNameOptions extends GetEscapedTableNameNameOptions {
+  columnNamePrefix?: string
+  columnNameOnly?: boolean;
+}
+
+export declare interface GetEscapedProjectionNameOptions extends GetEscapedColumnNameOptions, GetEscapedFieldNameOptions {
+  noProjectionAliases?: boolean;
+}
+
+export declare interface GetEscapedModelFieldsOptions extends GetEscapedProjectionNameOptions {
+  asProjection?: boolean;
+  asColumn?: boolean;
+}
+
+export declare interface JoinTableInfo {
+  operator: string;
+  joinType: string | LiteralBase;
+  rootModelName: string;
+  joinModel: ModelClass;
+  joinModelName: string;
+  leftSideModel: ModelClass;
+  leftSideModelName: string;
+  leftQueryContext: GenericObject;
+  leftSideField: Field;
+  rightSideModel: ModelClass;
+  rightSideModelName: string;
+  rightQueryContext: GenericObject;
+  rightSideField: Field;
+}
+
 declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
+  public getEscapedFieldName(Model: ModelClass | null | undefined, field: Field, options?: GetEscapedFieldNameOptions): string;
+  public getEscapedColumnName(Model: ModelClass | null | undefined, field: Field, options?: GetEscapedColumnNameOptions): string;
+  public getEscapedTableName(modelOrField: ModelClass | Field, options?: GetEscapedTableNameNameOptions): string;
+  public getEscapedProjectionName(Model: ModelClass | null | undefined, field: Field, options?: GetEscapedProjectionNameOptions): string;
+  public getEscapedModelFields(Model: ModelClass, options?: GetEscapedModelFieldsOptions): { [key: string]: string };
+  public isFieldIdentifier(value: string): boolean;
+  public getProjectedFields(queryEngine: QueryEngine, options?: GenericObject, asMap?: false | undefined): Array<string>;
+  public getProjectedFields(queryEngine: QueryEngine, options?: GenericObject, asMap?: true): Map<string, string>;
+
+  public getJoinTableInfoFromQueryContexts(
+    leftQueryContext: GenericObject,
+    rightQueryContext: GenericObject,
+    joinType: string | LiteralBase,
+    options?: GenericObject
+  ): JoinTableInfo;
+
   public prepareArrayValuesForSQL(array: Array<any>): Array<any>;
   public parseFieldProjection(value: string, getRawField: boolean): string | Field | undefined;
   public parseFieldProjectionToFieldMap(selectStatement: string): Map<string, Field | string>;
