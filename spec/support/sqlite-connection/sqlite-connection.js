@@ -7,8 +7,6 @@ const { Literals, Types }   = require('mythix-orm');
 const SQLConnectionBase     = require('../../../lib/sql-connection-base');
 const SQLiteQueryGenerator  = require('./sqlite-query-generator');
 
-const DefaultHelpers = Types.DefaultHelpers;
-
 class SQLiteConnection extends SQLConnectionBase {
   static dialect = 'sqlite';
 
