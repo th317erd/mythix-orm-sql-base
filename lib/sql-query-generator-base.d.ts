@@ -55,7 +55,6 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
   public getEscapedTableName(modelOrField: ModelClass | Field, options?: GetEscapedTableNameNameOptions): string;
   public getEscapedProjectionName(Model: ModelClass | null | undefined, field: Field, options?: GetEscapedProjectionNameOptions): string;
   public getEscapedModelFields(Model: ModelClass, options?: GetEscapedModelFieldsOptions): { [key: string]: string };
-  public isFieldIdentifier(value: string): boolean;
   public getProjectedFields(queryEngine: QueryEngine, options?: GenericObject, asMap?: false | undefined): Array<string>;
   public getProjectedFields(queryEngine: QueryEngine, options?: GenericObject, asMap?: true): Map<string, string>;
 
@@ -67,20 +66,12 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
   ): JoinTableInfo;
 
   public prepareArrayValuesForSQL(array: Array<any>): Array<any>;
-  public parseFieldProjection(value: string, getRawField: boolean): string | Field | undefined;
-  public parseFieldProjectionToFieldMap(selectStatement: string): Map<string, Field | string>;
 
   public generateSelectQueryFieldProjection(
     queryEngine: QueryEngine,
     options?: GenericObject,
-    asMap?: false | undefined,
+    projectedFields?: Map<string, string>,
   ): Array<string>;
-
-  public generateSelectQueryFieldProjection(
-    queryEngine: QueryEngine,
-    options?: GenericObject,
-    asMap?: true,
-  ): Map<string, string>;
 
   public generateSelectQueryOperatorFromQueryEngineOperator(
     queryPart: GenericObject,
