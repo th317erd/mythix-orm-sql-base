@@ -165,7 +165,7 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
 
   public generateInsertStatementTail(
     Model: ModelClass,
-    model: Model,
+    models: Model | Array<Model> | PreparedModels,
     options: GenericObject,
     context: {
       escapedTableName: string,
@@ -216,9 +216,9 @@ declare class SQLQueryGeneratorBase extends QueryGeneratorBase {
   public generateAddColumnStatement(field: Field, options?: GenericObject): string;
 
   public _collectRemoteReturningFields(Model: ModelClass): Array<string>;
-  public _collectReturningFields(
+  public generateReturningClause(
     Model: ModelClass,
-    model: Model,
+    models: Model | Array<Model> | PreparedModels,
     options: GenericObject,
     context: {
       escapedTableName: string,

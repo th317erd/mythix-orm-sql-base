@@ -15,12 +15,12 @@ class SQLiteQueryGenerator extends SQLQueryGeneratorBase {
     return joinType;
   }
 
-  generateInsertStatementTail(Model, model, options, context) {
-    return this._collectReturningFields(Model, model, options, context);
+  generateInsertStatementTail(Model, models, options, context) {
+    return this.generateReturningClause(Model, models, options, context);
   }
 
-  generateUpdateStatementTail(Model, model, options, context) {
-    return this._collectReturningFields(Model, model, options, context);
+  generateUpdateStatementTail(Model, models, options, context) {
+    return this.generateReturningClause(Model, models, options, context);
   }
 
   generateConditionPostfix({ sqlOperator }) {
