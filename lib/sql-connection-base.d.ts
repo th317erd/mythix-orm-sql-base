@@ -6,6 +6,9 @@ export declare interface ModelDataFromQueryResults {
 }
 
 declare class SQLConnectionBase extends ConnectionBase {
+  public isLimitSupportedInContext(options?: GenericObject): boolean;
+  public isOrderSupportedInContext(options?: GenericObject): boolean | string;
+
   public prepareArrayValuesForSQL(array: Array<any>): Array<any>;
   public generateSavePointName(): string;
 
